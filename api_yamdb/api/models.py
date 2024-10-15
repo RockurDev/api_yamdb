@@ -6,13 +6,13 @@ class BaseModel(models.Model):
 
     name = models.CharField(
         max_length=256,
-        verbose_name='Название',
-        null=True
+        blank=False,
+        verbose_name='Название'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        null=True,
+        blank=False,
         verbose_name='Слаг'
     )
 
