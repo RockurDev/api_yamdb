@@ -38,8 +38,6 @@ class CategoryViewSet(BaseViewSet):
 class TitleViewSet(BaseViewSet):
     """Title viewset."""
 
+    queryset = Title.objects.select_related('category', 'genre')
     serializer_class = TitleSerializer
     search_fields = ('name', 'category__name', 'genre__name', 'year')
-
-    def get_queryset(self):
-        return Title.objects.select_related('category', 'genre')
