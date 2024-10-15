@@ -1,4 +1,3 @@
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 
@@ -18,28 +17,6 @@ class BaseViewSet(viewsets.ModelViewSet):
     """Base viewset for title, category, genre."""
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-
-    def perform_create(self, serializer):
-        category_slug = self.request.data.get('category')
-        genre_slug = self.request.data.get('genre')
-        category = get_object_or_404(
-            Category, slug=category_slug
-        )
-        genre = get_object_or_404(
-            Genre, slug=genre_slug
-        )
-        serializer.save(category=category, genre=genre)
-
-    def perform_update(self, serializer):
-        category_slug = self.request.data.get('category')
-        genre_slug = self.request.data.get('genre')
-        if category_slug:
-            category = get_object_or_404(Category, slug=category_slug)
-            serializer.instance.category = category
-        if genre_slug:
-            genre = get_object_or_404(Genre, slug=genre_slug)
-            serializer.instance.genre = genre
-        serializer.save()
 
 
 class GenreViewSet(BaseViewSet):
