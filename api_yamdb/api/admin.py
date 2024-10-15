@@ -1,19 +1,34 @@
 from django.contrib import admin
 
-from .models import Category, Genre
+from .models import Category, Genre, Title
 
 
-class GenreAdmin(admin.ModelAdmin):
+class BaseAdmin(admin.ModelAdmin):
+    """Base admin model for genre and category."""
+
     list_display = ('name', 'slug')
     search_fields = ('name', 'slug')
-    list_editable = ('name', 'slug')
+    list_editable = ('slug',)
 
 
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
-    search_fields = ('name', 'slug')
-    list_editable = ('name', 'slug')
+@admin.register(Genre)
+class GenreAdmin(BaseAdmin):
+    """Admin model genre."""
+
+    pass
 
 
-admin.site.register(Category, CategoryAdmin)
-admin.site.register(Genre, GenreAdmin)
+@admin.register(Category)
+class CategoryAdmin(BaseAdmin):
+    """Admin model category."""
+
+    pass
+
+
+@admin.register(Title)
+class TitleAdmin(admin.ModelAdmin):
+    """Admin model title."""
+
+    list_display = ('name', 'description', 'category', 'genre', 'year')
+    search_fields = ('name', 'category', 'genre', 'year')
+    list_editable = ('description', 'category', 'genre', 'year')
