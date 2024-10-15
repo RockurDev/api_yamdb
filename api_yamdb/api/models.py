@@ -6,15 +6,18 @@ class BaseModel(models.Model):
 
     name = models.CharField(
         max_length=256,
-        verbose_name='Название'
+        verbose_name='Название',
+        null=True
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        null=True,
         verbose_name='Слаг'
     )
 
     class Meta:
+        ordering = ('name',)
         abstract = True
 
     def __str__(self):
