@@ -3,14 +3,15 @@ from django.db import models
 
 class Genre(models.Model):
     """Класс реализующий модель Жанра."""
+
     name = models.CharField(
         max_length=256,
-        on_delete=models.SET_NULL,
         verbose_name='Название'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True,
         verbose_name='Слаг'
     )
 
@@ -24,14 +25,15 @@ class Genre(models.Model):
 
 class Category(models.Model):
     """Класс реализующий модель Категории."""
+
     name = models.CharField(
         max_length=256,
-        on_delete=models.SET_NULL,
         verbose_name='Название'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True,
         verbose_name='Слаг категории'
     )
 
