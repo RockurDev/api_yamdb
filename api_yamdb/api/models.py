@@ -7,13 +7,13 @@ class BaseModel(models.Model):
     name = models.CharField(
         max_length=256,
         blank=False,
-        verbose_name='Название'
+        verbose_name='Название',
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
         blank=False,
-        verbose_name='Слаг'
+        verbose_name='Слаг',
     )
 
     class Meta:
@@ -45,26 +45,26 @@ class Title(models.Model):
 
     name = models.CharField(
         max_length=100,
-        verbose_name='Название'
+        verbose_name='Название',
     )
     description = models.TextField(
         max_length=256,
-        verbose_name='Описание'
+        verbose_name='Описание',
     )
     year = models.IntegerField(
-        verbose_name='Год'
+        verbose_name='Год',
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Категория'
+        verbose_name='Категория',
     )
     genre = models.ForeignKey(
         Genre,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Жанр'
+        verbose_name='Жанр',
     )
 
     class Meta:
