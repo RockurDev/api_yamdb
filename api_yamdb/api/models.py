@@ -1,4 +1,10 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+MAX_TEXT_LENGTH = 40
 
 
 class BaseModel(models.Model):
@@ -73,3 +79,33 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение',
+        related_name='reviews',
+    )
+    text = models.TextField(verbose_name='Текст отзыва')
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+        related_name='reviews',
+    )
+    score = models.SmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        verbose_name='Оценка',
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True, verbose_name='Дата публикации'
+    )
+
+    def __str__(self) -> str:
+        return self.text[:MAX_TEXT_LENGTH]
+
+    class Meta:
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
