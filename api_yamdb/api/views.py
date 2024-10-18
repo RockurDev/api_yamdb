@@ -91,3 +91,4 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     class Meta:
         read_only_fields = ('author',)
+
