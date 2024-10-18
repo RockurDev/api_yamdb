@@ -7,6 +7,11 @@ from django.conf import settings
 from api.models import Category, Genre, Title
 
 
+def get_data_frame(data_dir, filename):
+    file_path = os.path.join(data_dir, filename)
+    return pd.read_csv(file_path)
+
+
 class Command(BaseCommand):
     """Class implesments data parsing into a database."""
 
@@ -20,8 +25,7 @@ class Command(BaseCommand):
 
     def import_categories(self, data_dir):
         """Import categories into database."""
-        file_path = os.path.join(data_dir, 'category.csv')
-        df = pd.read_csv(file_path)
+        df = get_data_frame(data_dir, 'category.csv')
         for i, row in df.iterrows():
             Category.objects.get_or_create(
                 name=row['name'],
@@ -29,9 +33,7 @@ class Command(BaseCommand):
             )
 
     def import_genres(self, data_dir):
-        """Import genres into database."""
-        file_path = os.path.join(data_dir, 'genre.csv')
-        df = pd.read_csv(file_path)
+        df = get_data_frame(data_dir, 'genre.csv')
         for i, row in df.iterrows():
             Genre.objects.get_or_create(
                 name=row['name'],
@@ -40,8 +42,7 @@ class Command(BaseCommand):
 
     def import_titles(self, data_dir):
         """Import titles into database."""
-        file_path = os.path.join(data_dir, 'titles.csv')
-        df = pd.read_csv(file_path)
+        df = get_data_frame(data_dir, 'titles.csv')
         for i, row in df.iterrows():
             category = Category.objects.get(id=row['category'])
             Title.objects.get_or_create(
@@ -52,10 +53,8 @@ class Command(BaseCommand):
 
     def import_genre_titles(self, data_dir):
         """Import genre title into database."""
-        file_path = os.path.join(data_dir, 'genre_title.csv')
-        df = pd.read_csv(file_path)
+        df = get_data_frame(data_dir, 'genre_title.csv')
         for i, row in df.iterrows():
             title = Title.objects.get(id=row['title_id'])
             genre = Genre.objects.get(id=row['genre_id'])
             title.genres.add(genre)
-            title.save()

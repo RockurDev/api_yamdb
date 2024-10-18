@@ -29,6 +29,6 @@ class CategoryAdmin(BaseAdmin):
 class TitleAdmin(admin.ModelAdmin):
     """Admin model title."""
 
-    list_display = ('name', 'description', 'category', 'genre', 'year')
+    list_display = ('name', 'description', 'category', 'year')
     search_fields = ('name', 'category', 'genre', 'year')
-    list_editable = ('description', 'category', 'genre', 'year')
+    list_editable = ('description', 'category', 'year')
