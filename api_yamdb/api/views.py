@@ -4,12 +4,14 @@ from rest_framework import filters, viewsets
 from .models import (
     Category,
     Genre,
-    Title
+    Title,
+    Comment,
 )
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
-    TitleSerializer
+    TitleSerializer,
+    CommentSerializer,
 )
 
 
@@ -41,3 +43,18 @@ class TitleViewSet(BaseViewSet):
     queryset = Title.objects.select_related('category', 'genre')
     serializer_class = TitleSerializer
     search_fields = ('name', 'category__name', 'genre__name', 'year')
+
+
+class CommentViewSet(BaseViewSet):
+    """ "Comment viewset."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    search_fields = ('text',)
+    # permission_classes = []
+
+    def perform_create(self, serializer) -> None:
+        serializer.save(
+            title_id=self.request.data.get('title_id'),
+            review_id=self.request.data.get('review_id'),
+        )
