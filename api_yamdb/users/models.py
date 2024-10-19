@@ -24,7 +24,7 @@ class User(AbstractUser):
         null=True
     )
     last_name = models.CharField(
-        verbose_name='Введите фамилию',
+        verbose_name='Фамилия',
         max_length=20,
         blank=True,
         null=True

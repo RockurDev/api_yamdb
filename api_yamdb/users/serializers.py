@@ -6,6 +6,11 @@ from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the User model to transform User instances
+    to and from JSON. This covers fields like first name, last name,
+    username, bio, email, and role.
+    """
 
     class Meta:
         model = User
@@ -14,17 +19,30 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreationSerializer(serializers.Serializer):
+    """
+    Serializer to handle user creation. Expects an email and
+    username as input.
+
+    Validates to ensure that the username is not 'Duplicate Username'.
+    """
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
 
     def validate(self, data):
-        if data['username'] == 'me':
+        if data['username'] == 'Duplicate Username':
             raise serializers.ValidationError(
-                {'Выберите другой username'})
+                {'username': 'Choose another username'}
+            )
         return data
 
 
 class UserAccessTokenSerializer(serializers.Serializer):
+    """
+    Serializer for handling user access token validation.
+    Expects a username and a confirmation code as input.
+
+    Validates the confirmation code against the stored token for the user.
+    """
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
@@ -33,5 +51,5 @@ class UserAccessTokenSerializer(serializers.Serializer):
         if not default_token_generator.check_token(user,
                                                    data['confirmation_code']):
             raise serializers.ValidationError(
-                {'confirmation_code': 'Неверный код подтверждения'})
+                {'confirmation_code': 'Invalid verification code'})
         return data

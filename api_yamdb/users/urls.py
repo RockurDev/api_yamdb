@@ -5,11 +5,11 @@ from .views import UserViewSet, get_jwt_token, signup
 
 app_name = 'users'
 
-users_router = DefaultRouter()
-users_router.register(r'users', UserViewSet, basename='users')
+user_router = DefaultRouter()
+user_router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
-    path('v1/auth/token/', get_jwt_token, name='token'),
-    path('v1/auth/signup/', signup),
-    path('v1/', include(users_router.urls)),
+    path('auth/token/', get_jwt_token, name='token'),
+    path('auth/signup/', signup),
+    path('', include(user_router.urls)),
 ]
