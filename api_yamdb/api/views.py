@@ -56,7 +56,8 @@ class CommentViewSet(BaseViewSet):
             title_id=self.request.data.get('title_id'),
             review_id=self.request.data.get('review_id'),
         )
-        
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
@@ -69,7 +70,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.get_title().reviews
-˝˝
+
     def perform_create(self, serializer) -> None:
         # TODO: connect with custom user
         serializer.save(
