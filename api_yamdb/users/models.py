@@ -17,6 +17,18 @@ CHOICES = [
 
 
 class User(AbstractUser):
+    first_name = models.CharField(
+        verbose_name='Введите имя',
+        max_length=20,
+        blank=True,
+        null=True
+    )
+    last_name = models.CharField(
+        verbose_name='Введите фамилию'
+        max_length=20,
+        blank=True,
+        null=True
+    )
     email = models.EmailField(
         verbose_name='Электронная почта',
         unique=True
