@@ -73,3 +73,14 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Comment(models.Model):
+    title_id = models.ForeignKey(Title)
+    review_id = models.ForeignKey('Review')
+    text = models.TextField(verbose_name='Текст')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
