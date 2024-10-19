@@ -2,11 +2,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
 from django.contrib.auth import get_user_model
-from .models import Category, Genre, Title
+
+from .models import Category, Genre, Title, Comment
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
+    CommentSerializer,
     ReviewSerializer,
 )
 
@@ -41,6 +43,20 @@ class TitleViewSet(BaseViewSet):
     search_fields = ('name', 'category__name', 'genre__name', 'year')
 
 
+class CommentViewSet(BaseViewSet):
+    """ "Comment viewset."""
+
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    search_fields = ('text',)
+    # permission_classes = []
+
+    def perform_create(self, serializer) -> None:
+        serializer.save(
+            title_id=self.request.data.get('title_id'),
+            review_id=self.request.data.get('review_id'),
+        )
+        
 class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 

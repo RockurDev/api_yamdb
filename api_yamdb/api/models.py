@@ -82,6 +82,17 @@ class Title(models.Model):
         return self.name
 
 
+
+class Comment(models.Model):
+    title_id = models.ForeignKey(Title)
+    review_id = models.ForeignKey('Review')
+    text = models.TextField(verbose_name='Текст')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+
 class Review(models.Model):
     title = models.ForeignKey(
         Title,
@@ -110,3 +121,4 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+
