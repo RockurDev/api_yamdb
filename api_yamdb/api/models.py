@@ -68,7 +68,10 @@ class Title(models.Model):
         related_name='titles',
     )
     genres = models.ManyToManyField(
-        Genre, blank=False, verbose_name='Жанр', related_name='titles'
+        Genre,
+        blank=False,
+        verbose_name='Жанр',
+        related_name='titles',
     )
 
     class Meta:
