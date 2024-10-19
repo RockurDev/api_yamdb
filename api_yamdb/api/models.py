@@ -65,13 +65,10 @@ class Title(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Категория',
-        related_name='titles'
+        related_name='titles',
     )
     genres = models.ManyToManyField(
-        Genre,
-        blank=False,
-        verbose_name='Жанр',
-        related_name='titles'
+        Genre, blank=False, verbose_name='Жанр', related_name='titles'
     )
 
     class Meta:
@@ -82,18 +79,9 @@ class Title(models.Model):
         return self.name
 
 
-
-class Comment(models.Model):
-    title_id = models.ForeignKey(Title)
-    review_id = models.ForeignKey('Review')
-    text = models.TextField(verbose_name='Текст')
-
-    class Meta:
-        verbose_name = 'Комментарий'
-        verbose_name_plural = 'Комментарии'
-
-
 class Review(models.Model):
+    """Review model."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -122,3 +110,14 @@ class Review(models.Model):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
+
+class Comment(models.Model):
+    """Comment model."""
+
+    title_id = models.ForeignKey(Title, on_delete=models.CASCADE)
+    review_id = models.ForeignKey(Review, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name='Текст')
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
