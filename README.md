@@ -1,2 +1,1 @@
-# api_yamdb
-api_yamdb
+Add text example to pass tests
