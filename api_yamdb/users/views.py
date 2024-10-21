@@ -1,14 +1,16 @@
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework import status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import AllowAny
 
+from api.permissions import IsAdmin
 from .models import CustomUser
 from .serializers import (
     UserAccessTokenSerializer,
@@ -22,9 +24,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdmin]
     lookup_field = 'username'
 
-    @action(methods=['patch', 'get'], detail=False, url_path='me')
+    @action(methods=['patch', 'get'], detail=False, url_path='me',
+            permission_classes=[permissions.IsAuthenticated])
     def me(self, request: Request) -> Response:
         if request.method == 'GET':
             serializer = UserSerializer(self.request.user)
@@ -73,3 +77,14 @@ def signup(request: Request) -> Response:
         {'username': user.username, 'email': user.email},
         status=status.HTTP_200_OK,
     )
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def get_jwt_token(request):
+    serializer = UserAccessTokenSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data['username']
+    user = get_object_or_404(User, username=username)
+    token = AccessToken.for_user(user)
+    return Response({'token': str(token)}, status=status.HTTP_200_OK)
