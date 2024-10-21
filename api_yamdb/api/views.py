@@ -3,8 +3,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
 from django.contrib.auth import get_user_model
 
-from .models import Category, Genre, Title, Comment
-from .serializers import (
+from reviews.models import Category, Genre, Title, Comment
+from api.serializers import (
     CategorySerializer,
     GenreSerializer,
     TitleSerializer,
@@ -77,7 +77,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
             title_id=self.kwargs.get('title_id'),
             author=get_user_model().objects.get(pk=1),
         )
-        # serializer.save(title_id = self.kwargs.get('title_id'),author=self.request.user)
+        # serializer.save(title_id = self.kwargs.get('title_id'), author=self.request.user)
 
     class Meta:
         read_only_fields = ('author',)
