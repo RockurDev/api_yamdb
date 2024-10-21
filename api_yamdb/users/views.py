@@ -57,25 +57,31 @@ def get_jwt_token(request: Request) -> Response:
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def signup(request: Request) -> Response:
+def signup(request):
     serializer = UserCreationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    user = serializer.save()
-
+    email = serializer.validated_data['email']
+    username = serializer.validated_data['username']
+    if (
+        CustomUser.objects.filter(email=email).exists()
+        or CustomUser.objects.filter(username=username).exists()
+    ):
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    user, code_created = CustomUser.objects.get_or_create(
+        email=email, username=username)
     confirmation_code = default_token_generator.make_token(user)
-
+    user.confirmation_code = confirmation_code
+    user.save()
     send_mail(
         'Confirmation code',
-        f'Your confirmation code is {confirmation_code}',
+        f'Your code {confirmation_code}',
         settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
+        [email],
+        fail_silently=False
     )
-
     return Response(
-        {'username': user.username, 'email': user.email},
-        status=status.HTTP_200_OK,
+        serializer.data,
+        status=status.HTTP_200_OK
     )
 
 
@@ -85,6 +91,6 @@ def get_jwt_token(request):
     serializer = UserAccessTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.validated_data['username']
-    user = get_object_or_404(User, username=username)
+    user = get_object_or_404(user, username=username)
     token = AccessToken.for_user(user)
     return Response({'token': str(token)}, status=status.HTTP_200_OK)
