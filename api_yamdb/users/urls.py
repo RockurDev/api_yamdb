@@ -9,7 +9,7 @@ user_router = DefaultRouter()
 user_router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
+    path('auth/signup/', signup, name='signup'),
     path('auth/token/', get_jwt_token, name='token'),
-    path('auth/signup/', signup),
     path('', include(user_router.urls)),
 ]

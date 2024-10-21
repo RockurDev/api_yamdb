@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 
 
@@ -12,38 +12,22 @@ CHOICES = [
     ('anon', ANONIM),
     ('admin', ADMIN),
     ('moderator', MODERATOR),
-    ('user', USER)
+    ('user', USER),
 ]
 
 
-class User(AbstractUser):
+class CustomUser(AbstractBaseUser):
+    username = models.SlugField(max_length=150, verbose_name='Слаг')
     first_name = models.CharField(
-        verbose_name='Введите имя',
-        max_length=20,
-        blank=True,
-        null=True
+        verbose_name='Введите имя', max_length=150, blank=True, null=True
     )
     last_name = models.CharField(
-        verbose_name='Фамилия',
-        max_length=20,
-        blank=True,
-        null=True
+        verbose_name='Фамилия', max_length=150, blank=True, null=True
     )
-    email = models.EmailField(
-        verbose_name='Электронная почта',
-        unique=True
-    )
-    bio = models.CharField(
-        verbose_name='Биография',
-        max_length=100,
-        blank=True,
-        null=True
-    )
+    email = models.EmailField(max_length=254, verbose_name='Электронная почта')
+    bio = models.TextField(verbose_name='Биография', blank=True, null=True)
     role = models.CharField(
-        verbose_name='Роль',
-        choices=CHOICES,
-        default=USER,
-        max_length=10
+        verbose_name='Роль', choices=CHOICES, default=USER, max_length=10
     )
     confirmation_code = models.CharField(
         verbose_name='Код подтверждения',
@@ -51,29 +35,28 @@ class User(AbstractUser):
         editable=False,
         null=True,
         blank=True,
-        unique=True
+        unique=True,
     )
 
-    @property
-    def is_admin(self):
-        return any(
-            [self.role == ADMIN, self.is_superuser, self.is_staff]
-        )
+    USERNAME_FIELD = 'id'
 
     @property
-    def is_moderator(self):
+    def is_admin(self) -> bool:
+        return any([self.role == ADMIN, self.is_superuser, self.is_staff])
+
+    @property
+    def is_moderator(self) -> bool:
         return self.role == MODERATOR
 
-    class Meta(AbstractUser.Meta):
+    class Meta(AbstractBaseUser.Meta):
         ordering = ['username']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         constraints = [
             models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_username_email'
+                fields=['username', 'email'], name='unique_username_email'
             )
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.username
