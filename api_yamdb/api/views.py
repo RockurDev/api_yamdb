@@ -2,7 +2,12 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, viewsets
 
-from api_yamdb.users.permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from users.permissions import (
+    IsAdminOrReadOnly,
+    IsModeratorOrReadOnly,
+    IsOwnerOrReadOnly,
+    IsSuperuserOrAdmin
+)
 from reviews.models import Category, Genre, Title, Comment
 from api.serializers import (
     CategorySerializer,
@@ -50,7 +55,7 @@ class CommentViewSet(BaseViewSet):
     """ "Comment viewset."""
 
     queryset = Comment.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
     serializer_class = CommentSerializer
     search_fields = ('text',)
     # permission_classes = []
@@ -66,7 +71,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
 
     def get_title(self) -> Title:
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
