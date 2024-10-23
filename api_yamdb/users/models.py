@@ -1,4 +1,3 @@
-import re
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.db import models
 
@@ -29,8 +28,10 @@ CHOICES = [
 class CustomUser(AbstractBaseUser):
     objects = UserManager()
 
-    is_staff = models.BooleanField(verbose_name='Is Staff')
-    is_superuser = models.BooleanField(verbose_name='Is Superuser')
+    is_staff = models.BooleanField(verbose_name='Is Staff', default=False)
+    is_superuser = models.BooleanField(
+        verbose_name='Is Superuser', default=False
+    )
 
     username = models.SlugField(max_length=150, verbose_name='Слаг')
     first_name = models.CharField(
