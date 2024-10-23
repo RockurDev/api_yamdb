@@ -8,15 +8,6 @@ USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
-
-# CHOICES = [
-#     ('anon', ANONIM),
-#     ('admin', ADMIN),
-#     ('moderator', MODERATOR),
-#     ('user', USER),
-# ]
-
-
 CHOICES = [
     (ANONIM, 'Anonymous'),
     (USER, 'User'),
