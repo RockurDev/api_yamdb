@@ -14,7 +14,14 @@ dependencies = [
     'pytest-pythonpath==0.7.3',
     'django-filter==23.5',
     "djangorestframework-simplejwt>=5.3.1",
+    "pandas>=2.2.3",
 ]
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+exclude = ["postman_collection*"]  
 
 [tool.ruff]
 target-version = 'py39'
