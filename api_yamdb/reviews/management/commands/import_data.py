@@ -72,7 +72,7 @@ class Command(BaseCommand):
         for _, row in df.iterrows():
             title = Title.objects.get(id=row['title_id'])
             genre = Genre.objects.get(id=row['genre_id'])
-            title.genres.add(genre)
+            title.genre.add(genre)
 
     def import_users(self, data_dir):
         """Import users into database."""
@@ -86,7 +86,12 @@ class Command(BaseCommand):
                 role=row['role'],
                 bio=row['bio'],
                 first_name=row['first_name'],
-                last_name=row['last_name']
+                last_name=row['last_name'],
+                defaults={
+                    'is_staff': True,
+                    'is_superuser': True
+                }
+
             )
 
     def import_reviews(self, data_dir):
