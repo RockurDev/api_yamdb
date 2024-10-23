@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 User = get_user_model()
 
@@ -59,6 +60,10 @@ class Title(models.Model):
     )
     year = models.IntegerField(
         verbose_name='Год',
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(timezone.now().year),
+        ],
     )
     category = models.ForeignKey(
         Category,
@@ -67,7 +72,7 @@ class Title(models.Model):
         verbose_name='Категория',
         related_name='titles',
     )
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre,
         blank=False,
         verbose_name='Жанр',
@@ -112,22 +117,24 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'], name='unique_review'
+            )
+        ]
 
 
 class Comment(models.Model):
     """Comment model."""
 
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, null=True)
+    # title = models.ForeignKey(Title, on_delete=models.CASCADE, null=True)
     review = models.ForeignKey(Review, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Автор'
+        User, on_delete=models.CASCADE, verbose_name='Автор'
     )
     pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации'
+        auto_now_add=True, verbose_name='Дата публикации'
     )
 
     class Meta:

@@ -1,22 +1,37 @@
-from django.contrib.auth.models import AbstractBaseUser
+import re
+from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.db import models
 
 
-ANONIM = 'anonim'
+# ANONIM = 'anonim'
+ANONIM = 'anonym'
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
 
+# CHOICES = [
+#     ('anon', ANONIM),
+#     ('admin', ADMIN),
+#     ('moderator', MODERATOR),
+#     ('user', USER),
+# ]
+
+
 CHOICES = [
-    ('anon', ANONIM),
-    ('admin', ADMIN),
-    ('moderator', MODERATOR),
-    ('user', USER),
+    (ANONIM, 'Anonymous'),
+    (USER, 'User'),
+    (MODERATOR, 'Moderator'),
+    (ADMIN, 'Admin'),
 ]
 
 
 class CustomUser(AbstractBaseUser):
+    objects = UserManager()
+
+    is_staff = models.BooleanField(verbose_name='Is Staff')
+    is_superuser = models.BooleanField(verbose_name='Is Superuser')
+
     username = models.SlugField(max_length=150, verbose_name='Слаг')
     first_name = models.CharField(
         verbose_name='Введите имя', max_length=150, blank=True, null=True
@@ -39,6 +54,7 @@ class CustomUser(AbstractBaseUser):
     )
 
     USERNAME_FIELD = 'id'
+    REQUIRED_FIELDS = ['email']
 
     @property
     def is_admin(self) -> bool:
