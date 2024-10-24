@@ -9,6 +9,12 @@ from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import AllowAny
 
+from .permissions import (
+    IsAdminOrReadOnly,
+    IsModeratorOrReadOnly,
+    IsOwnerOrReadOnly,
+    IsSuperuserOrAdmin
+)
 from .models import CustomUser
 from .serializers import (
     UserAccessTokenSerializer,
@@ -22,6 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsSuperuserOrAdmin]
     lookup_field = 'username'
 
     @action(methods=['patch', 'get'], detail=False, url_path='me')

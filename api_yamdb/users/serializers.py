@@ -1,5 +1,3 @@
-import re
-
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -16,6 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
         exclude = ('confirmation_code',)
 
 
@@ -26,6 +25,13 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
     email = serializers.EmailField(required=True)
     username = serializers.CharField(required=True)
+
+    def validate_email(self, value) -> str:
+        if len(value) > 254:
+            raise serializers.ValidationError(
+                {'email': 'Choose another email'}
+            )
+        return value
 
     def validate_username(self, value) -> str:
         if len(value) > 150 or value == 'me':
