@@ -143,7 +143,7 @@ class CommentViewSet(BaseViewSet):
     """ "Comment viewset."""
 
     queryset = Comment.objects.all()
-    permission_classes = [IsSuperuserOrAdmin]
+    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
     serializer_class = CommentSerializer
     search_fields = ('text',)
 
@@ -158,7 +158,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsSuperuserOrAdmin]
+    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
 
     def get_title(self) -> Title:
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
@@ -178,3 +178,4 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     class Meta:
         read_only_fields = ('author',)
+

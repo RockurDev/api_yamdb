@@ -56,6 +56,10 @@ class CustomUser(AbstractBaseUser):
     def is_moderator(self) -> bool:
         return self.role == MODERATOR
 
+    @property
+    def is_user(self) -> bool:
+        return self.role == USER
+
     class Meta(AbstractBaseUser.Meta):
         ordering = ['username']
         verbose_name = 'Пользователь'

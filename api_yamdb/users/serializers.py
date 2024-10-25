@@ -77,6 +77,13 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate_email(self, value):
+        if len(value) > 254:
+            raise serializers.ValidationError(
+                'Содержимое "email" не должно превышать 254 символа'
+            )
+        return value
+
     class Meta:
         model = CustomUser
         fields = ['email', 'username']
