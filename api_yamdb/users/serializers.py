@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
@@ -14,7 +16,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )
         exclude = ('confirmation_code',)
 
 
@@ -41,7 +50,7 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
         if not re.match(r'^[\w.@+-]+$', value):
             raise serializers.ValidationError(
-                {'username': 'Username contains not allowed symbols.'}
+                'Username contains not allowed symbols'
             )
 
         return value
@@ -53,7 +62,7 @@ class UserCreationSerializer(serializers.ModelSerializer):
         if CustomUser.objects.filter(username=username).exists():
             user = CustomUser.objects.get(username=username)
 
-            if user.email == email:
+            if user.email != email:
                 if not CustomUser.objects.filter(email=email).exists():
                     raise serializers.ValidationError(
                         {'username': 'Choose another username.'}
@@ -77,12 +86,12 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
         return data
 
-    def validate_email(self, value):
-        if len(value) > 254:
-            raise serializers.ValidationError(
-                'Содержимое "email" не должно превышать 254 символа'
-            )
-        return value
+    def get_or_create(self, **validated_data):
+        instance, _ = CustomUser.objects.get_or_create(
+            username=self.validated_data['username'],
+            email=self.validated_data['email'],
+        )
+        return instance
 
     class Meta:
         model = CustomUser
