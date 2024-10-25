@@ -1,0 +1,127 @@
+import re
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers
+
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the User model to transform User instances
+    to and from JSON. This covers fields like first name, last name,
+    username, bio, email, and role.
+    """
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'email',
+            'role',
+            'first_name',
+            'last_name',
+            'bio',
+        )
+
+
+class UserCreationSerializer(serializers.ModelSerializer):
+    """
+    Serializer to handle user creation. Expects an email and username as input.
+    """
+
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
+
+    def validate_email(self, value) -> str:
+        if len(value) > 254:
+            raise serializers.ValidationError(
+                {'email': 'Choose another email'}
+            )
+        return value
+
+    def validate_username(self, value) -> str:
+        if len(value) > 150 or value == 'me':
+            raise serializers.ValidationError(
+                {'email': 'Choose another username'}
+            )
+
+        if not re.match(r'^[\w.@+-]+$', value):
+            raise serializers.ValidationError(
+                'Username contains not allowed symbols'
+            )
+
+        return value
+
+    def validate(self, data):
+        username = data['username']
+        email = data['email']
+
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
+
+            if user.email != email:
+                if not User.objects.filter(email=email).exists():
+                    raise serializers.ValidationError(
+                        {'username': 'Choose another username.'}
+                    )
+                else:
+                    raise serializers.ValidationError(
+                        {
+                            'username': 'Choose another username.',
+                            'email': email,
+                        }
+                    )
+
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            if user.username != username:
+                raise serializers.ValidationError(
+                    {
+                        'email': 'This email is already registered with a different username.'
+                    }
+                )
+
+        return data
+
+    def get_or_create(self, **validated_data):
+        instance, _ = User.objects.get_or_create(
+            username=self.validated_data['username'],
+            email=self.validated_data['email'],
+        )
+        return instance
+
+    class Meta:
+        model = User
+        fields = ['email', 'username']
+        extra_kwargs = {'password': {'write_only': True}}
+
+
+class UserAccessTokenSerializer(serializers.ModelSerializer):
+    """
+    Serializer for handling user access token validation.
+    Expects a username and a confirmation code as input.
+
+    Validates the confirmation code against the stored token for the user.
+    """
+
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    def validate(self, data):
+        user = get_object_or_404(User, username=data['username'])
+
+        if not default_token_generator.check_token(
+            user, data['confirmation_code']
+        ):
+            raise serializers.ValidationError(
+                {'confirmation_code': 'Invalid verification code'}
+            )
+
+        return data
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
