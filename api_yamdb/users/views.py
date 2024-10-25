@@ -13,7 +13,7 @@ from .permissions import (
     IsAdminOrReadOnly,
     IsModeratorOrReadOnly,
     IsOwnerOrReadOnly,
-    IsSuperuserOrAdmin
+    IsSuperuserOrAdmin,
 )
 from .models import CustomUser
 from .serializers import (
@@ -65,18 +65,19 @@ def signup(request: Request) -> Response:
     serializer = UserCreationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
-    user = serializer.save()
+    # If the user not exists and requests confirmation code
+    user = serializer.get_or_create()        
 
     confirmation_code = default_token_generator.make_token(user)
 
     send_mail(
-        'Confirmation code',
-        f'Your confirmation code is {confirmation_code}',
+        'API_YAMDB. Confirmation code',
+        f'Your confirmation code: {confirmation_code}',
         settings.DEFAULT_FROM_EMAIL,
         [user.email],
         fail_silently=False,
     )
-
+    
     return Response(
         {'username': user.username, 'email': user.email},
         status=status.HTTP_200_OK,
