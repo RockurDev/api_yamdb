@@ -9,7 +9,7 @@ from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import AllowAny
 
-from users.permissions import (
+from .permissions import (
     IsAdminOrReadOnly,
     IsModeratorOrReadOnly,
     IsOwnerOrReadOnly,
@@ -28,6 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsSuperuserOrAdmin]
     lookup_field = 'username'
     permission_classes = [IsSuperuserOrAdmin]
 
