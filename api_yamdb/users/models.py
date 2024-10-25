@@ -25,13 +25,13 @@ class CustomUser(AbstractBaseUser):
 
     username = models.SlugField(max_length=150, verbose_name='Слаг')
     first_name = models.CharField(
-        verbose_name='Введите имя', max_length=150, blank=True, null=True
+        verbose_name='Введите имя', max_length=150, blank=True, default=''
     )
     last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150, blank=True, null=True
+        verbose_name='Фамилия', max_length=150, blank=True, default=''
     )
     email = models.EmailField(max_length=254, verbose_name='Электронная почта')
-    bio = models.TextField(verbose_name='Биография', blank=True, null=True)
+    bio = models.TextField(verbose_name='Биография', blank=True, default='')
     role = models.CharField(
         verbose_name='Роль', choices=CHOICES, default=USER, max_length=10
     )
@@ -60,6 +60,7 @@ class CustomUser(AbstractBaseUser):
         return self.role == USER
 
     class Meta(AbstractBaseUser.Meta):
+        app_label = 'users'
         ordering = ['username']
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
