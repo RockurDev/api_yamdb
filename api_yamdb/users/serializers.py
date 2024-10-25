@@ -1,10 +1,11 @@
 import re
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from .models import CustomUser
+User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -15,16 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             'username',
             'email',
+            'role',
             'first_name',
             'last_name',
             'bio',
-            'role',
         )
-        exclude = ('confirmation_code',)
 
 
 class UserCreationSerializer(serializers.ModelSerializer):
@@ -59,11 +59,11 @@ class UserCreationSerializer(serializers.ModelSerializer):
         username = data['username']
         email = data['email']
 
-        if CustomUser.objects.filter(username=username).exists():
-            user = CustomUser.objects.get(username=username)
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
 
             if user.email != email:
-                if not CustomUser.objects.filter(email=email).exists():
+                if not User.objects.filter(email=email).exists():
                     raise serializers.ValidationError(
                         {'username': 'Choose another username.'}
                     )
@@ -75,8 +75,8 @@ class UserCreationSerializer(serializers.ModelSerializer):
                         }
                     )
 
-        if CustomUser.objects.filter(email=email).exists():
-            user = CustomUser.objects.get(email=email)
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
             if user.username != username:
                 raise serializers.ValidationError(
                     {
@@ -87,14 +87,14 @@ class UserCreationSerializer(serializers.ModelSerializer):
         return data
 
     def get_or_create(self, **validated_data):
-        instance, _ = CustomUser.objects.get_or_create(
+        instance, _ = User.objects.get_or_create(
             username=self.validated_data['username'],
             email=self.validated_data['email'],
         )
         return instance
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ['email', 'username']
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -111,7 +111,7 @@ class UserAccessTokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data):
-        user = get_object_or_404(CustomUser, username=data['username'])
+        user = get_object_or_404(User, username=data['username'])
 
         if not default_token_generator.check_token(
             user, data['confirmation_code']
@@ -123,5 +123,5 @@ class UserAccessTokenSerializer(serializers.ModelSerializer):
         return data
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ('username', 'confirmation_code')
