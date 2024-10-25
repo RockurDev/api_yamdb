@@ -1,15 +1,10 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from .views import UserViewSet, get_jwt_token, signup
+from .views import get_jwt_token, signup
 
 app_name = 'users'
-
-user_router = DefaultRouter()
-user_router.register('users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('auth/signup/', signup, name='signup'),
     path('auth/token/', get_jwt_token, name='token'),
-    path('', include(user_router.urls)),
 ]
