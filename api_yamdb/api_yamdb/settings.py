@@ -16,6 +16,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
+# fmt: off
 INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
@@ -35,6 +36,7 @@ INSTALLED_APPS = [
     'users',
     'api',
 ]
+# fmt: on
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,6 +80,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Password validation
 
@@ -121,25 +124,21 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # REST
 
 REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': [
-#         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-#     ],
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     ],
-    'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.PageNumberPagination',
+    #     'DEFAULT_PERMISSION_CLASSES': [
+    #         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    #     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
 
 # User authentication
 
 SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=365),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
 # User 2nd factor authentication
