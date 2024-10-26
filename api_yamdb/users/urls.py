@@ -5,6 +5,6 @@ from .views import get_jwt_token, signup
 app_name = 'users'
 
 urlpatterns = [
-    path('auth/signup/', signup, name='signup'),
-    path('auth/token/', get_jwt_token, name='token'),
+    path('signup/', signup, name='signup'),
+    path('token/', get_jwt_token, name='token'),
 ]
