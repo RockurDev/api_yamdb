@@ -30,7 +30,7 @@ class CustomUser(AbstractBaseUser):
     last_name = models.CharField(
         verbose_name='Фамилия', max_length=150, blank=True
     )
-    email = models.EmailField(max_length=254, verbose_name='Электронная почта')
+    email = models.EmailField(max_length=254, verbose_name='Электронная почта', unique=True)
     bio = models.TextField(verbose_name='Биография', blank=True)
     role = models.CharField(
         verbose_name='Роль', choices=CHOICES, default=USER, max_length=10

@@ -8,7 +8,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -48,7 +48,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
         read_only_fields = ('author',)
 
 

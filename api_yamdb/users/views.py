@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
@@ -57,7 +58,8 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         return super().update(request, *args, **kwargs)
 
-    @action(methods=['patch', 'get'], detail=False, url_path='me')
+    @action(methods=['patch', 'get'],
+            detail=False, url_path='me', permission_classes=[IsAuthenticated])
     def me(self, request: Request) -> Response:
         if request.method == 'GET':
             serializer = UserSerializer(self.request.user)

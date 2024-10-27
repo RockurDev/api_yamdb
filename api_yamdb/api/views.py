@@ -108,30 +108,33 @@ class TitleFilter(FilterSet):
 class TitleViewSet(BaseViewSet):
     """Title viewset."""
 
-    queryset = Title.objects.select_related('category', 'genre')
+    queryset = Title.objects.all().order_by('id')
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
+    filterset_class = TitleFilter
     serializer_class = TitleSerializer
-    search_fields = ('name', 'category__name', 'genre__name', 'year')
+    search_fields = ('name', 'category', 'genre', 'year')
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return Title.objects.all()
+        return Title.objects.all().order_by('id')
 
     def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            return Response(
-                {'detail': 'Method Not Allowed'},
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-        return super().update(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.is_admin:
-            return super().partial_update(request, *args, **kwargs)
-        return Response(
-            {'detail': 'Method Not Allowed'},
-            status=status.HTTP_405_METHOD_NOT_ALLOWED
-        )
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
 
     def get_serializer_class(self):
         if self.action in ['create', 'partial_update']:
