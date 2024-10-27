@@ -124,14 +124,11 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # REST
 
 REST_FRAMEWORK = {
-    #     'DEFAULT_PERMISSION_CLASSES': [
-    #         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    #     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-    'DEFAULT_PAGINATION_CLASS':
-    'rest_framework.pagination.PageNumberPagination',
+    ),
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.SearchFilter',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 100,
 }
 
