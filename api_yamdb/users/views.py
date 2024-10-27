@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import ValidationError
 
 from .permissions import (
     IsSuperuserOrAdmin,
@@ -37,8 +38,9 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         email = request.data.get('email')
         if User.objects.filter(email=email).exists():
-            return Response({'email': 'User with this Email already exists.'},
-                            status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(
+                {'email': 'User with this Email already exists.'}
+            )
         return super().create(request, *args, **kwargs)
 
     def get_queryset(self):

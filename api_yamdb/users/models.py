@@ -23,7 +23,7 @@ class CustomUser(AbstractBaseUser):
         verbose_name='Is Superuser', default=False
     )
 
-    username = models.SlugField(max_length=150, verbose_name='Слаг', unique=True)
+    username = models.SlugField(max_length=150, unique=True, verbose_name='Слаг')
     first_name = models.CharField(
         verbose_name='Введите имя', max_length=150, blank=True
     )
