@@ -2,50 +2,24 @@ from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.db import models
 
 
-ANONIM = 'anonym'
+ANONYM = 'anonym'
 USER = 'user'
 MODERATOR = 'moderator'
 ADMIN = 'admin'
 
-CHOICES = [
-    (ANONIM, 'Anonymous'),
+ROLE_CHOICES = [
+    (ANONYM, 'Anonymous'),
     (USER, 'User'),
     (MODERATOR, 'Moderator'),
     (ADMIN, 'Admin'),
 ]
 
 
-class CustomUser(AbstractBaseUser):
-    objects = UserManager()
-
-    is_staff = models.BooleanField(verbose_name='Is Staff', default=False)
-    is_superuser = models.BooleanField(
-        verbose_name='Is Superuser', default=False
-    )
-
-    username = models.SlugField(max_length=150, unique=True, verbose_name='Слаг')
-    first_name = models.CharField(
-        verbose_name='Введите имя', max_length=150, blank=True
-    )
-    last_name = models.CharField(
-        verbose_name='Фамилия', max_length=150, blank=True
-    )
-    email = models.EmailField(max_length=254, verbose_name='Электронная почта', unique=True)
-    bio = models.TextField(verbose_name='Биография', blank=True)
-    role = models.CharField(
-        verbose_name='Роль', choices=CHOICES, default=USER, max_length=10
-    )
-    confirmation_code = models.CharField(
-        verbose_name='Код подтверждения',
-        max_length=200,
-        editable=False,
-        null=True,
-        blank=True,
-        unique=True,
-    )
-
-    USERNAME_FIELD = 'id'
-    REQUIRED_FIELDS = ['email']
+class BaseUser:
+    """
+    A base class for user properties and methods.
+    This class does not inherit from models.Model, so no extra table is created.
+    """
 
     @property
     def is_admin(self) -> bool:
@@ -59,6 +33,51 @@ class CustomUser(AbstractBaseUser):
     def is_user(self) -> bool:
         return self.role == USER
 
+    def __str__(self) -> str:
+        return self.username
+
+
+class CustomUser(AbstractBaseUser, BaseUser):
+    """
+    Custom user model inheriting from AbstractBaseUser and BaseUser.
+    This model is the one that will create a table in the database.
+    """
+
+    objects = UserManager()
+
+    is_staff = models.BooleanField(verbose_name='Is Staff', default=False)
+    is_superuser = models.BooleanField(
+        verbose_name='Is Superuser', default=False
+    )
+
+    username = models.SlugField(
+        max_length=150, unique=True, verbose_name='Слаг'
+    )
+    first_name = models.CharField(
+        max_length=150, blank=True, verbose_name='Имя'
+    )
+    last_name = models.CharField(
+        max_length=150, blank=True, verbose_name='Фамилия'
+    )
+    email = models.EmailField(
+        max_length=254, unique=True, verbose_name='Электронная почта'
+    )
+    bio = models.TextField(blank=True, verbose_name='Биография')
+    role = models.CharField(
+        max_length=10, choices=ROLE_CHOICES, default=USER, verbose_name='Роль'
+    )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        max_length=200,
+        editable=False,
+        null=True,
+        blank=True,
+        unique=True,
+    )
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
+
     class Meta(AbstractBaseUser.Meta):
         app_label = 'users'
         ordering = ['username']
@@ -69,6 +88,3 @@ class CustomUser(AbstractBaseUser):
                 fields=['username', 'email'], name='unique_username_email'
             )
         ]
-
-    def __str__(self) -> str:
-        return self.username
