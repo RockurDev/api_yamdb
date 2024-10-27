@@ -8,10 +8,11 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from .permissions import (
     IsSuperuserOrAdmin,
+    IsOwnerOrReadOnly
 )
 
 from .serializers import (
@@ -37,6 +38,14 @@ class UserViewSet(viewsets.ModelViewSet):
         if search_param:
             queryset = queryset.filter(username__icontains=search_param)
         return queryset
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(
+                {'detail': 'Method Not Allowed'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return super().update(request, *args, **kwargs)
 
     @action(methods=['patch', 'get'], detail=False, url_path='me')
     def me(self, request: Request) -> Response:

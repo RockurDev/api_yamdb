@@ -23,14 +23,14 @@ class CustomUser(AbstractBaseUser):
         verbose_name='Is Superuser', default=False
     )
 
-    username = models.SlugField(max_length=150, verbose_name='Слаг')
+    username = models.SlugField(max_length=150, verbose_name='Слаг', unique=True)
     first_name = models.CharField(
         verbose_name='Введите имя', max_length=150, blank=True, default=''
     )
     last_name = models.CharField(
         verbose_name='Фамилия', max_length=150, blank=True, default=''
     )
-    email = models.EmailField(max_length=254, verbose_name='Электронная почта')
+    email = models.EmailField(max_length=254, verbose_name='Электронная почта', unique=True)
     bio = models.TextField(verbose_name='Биография', blank=True, default='')
     role = models.CharField(
         verbose_name='Роль', choices=CHOICES, default=USER, max_length=10
