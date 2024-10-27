@@ -31,6 +31,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsSuperuserOrAdmin]
     lookup_field = 'username'
+    search_fields = ('role',)
 
     def get_queryset(self):
         queryset = super().get_queryset()
