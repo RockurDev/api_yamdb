@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.mail import send_mail
@@ -33,6 +34,13 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     search_fields = ('role',)
 
+    def create(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        if User.objects.filter(email=email).exists():
+            return Response({'email': 'User with this Email already exists.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+        return super().create(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = super().get_queryset()
         search_param = self.request.query_params.get('search', None)
@@ -48,7 +56,8 @@ class UserViewSet(viewsets.ModelViewSet):
             )
         return super().update(request, *args, **kwargs)
 
-    @action(methods=['patch', 'get'], detail=False, url_path='me')
+    @action(methods=['patch', 'get'],
+            detail=False, url_path='me', permission_classes=[IsAuthenticated])
     def me(self, request: Request) -> Response:
         if request.method == 'GET':
             serializer = UserSerializer(self.request.user)
