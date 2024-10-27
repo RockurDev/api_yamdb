@@ -45,7 +45,7 @@ class UserCreationSerializer(serializers.ModelSerializer):
     def validate_username(self, value) -> str:
         if len(value) > 150 or value == 'me':
             raise serializers.ValidationError(
-                {'email': 'Choose another username'}
+                {'username': 'Choose another username'}
             )
 
         if not re.match(r'^[\w.@+-]+$', value):
