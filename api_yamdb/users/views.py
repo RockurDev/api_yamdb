@@ -32,6 +32,13 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
     search_fields = ('role',)
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_param = self.request.query_params.get('search', None)
+        if search_param:
+            queryset = queryset.filter(username__icontains=search_param)
+        return queryset
+
     @action(methods=['patch', 'get'], detail=False, url_path='me')
     def me(self, request: Request) -> Response:
         if request.method == 'GET':
