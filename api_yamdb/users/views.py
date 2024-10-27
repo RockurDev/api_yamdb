@@ -90,6 +90,7 @@ def signup(request: Request) -> Response:
     serializer = UserCreationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
+    # If the user not exists and requests confirmation code
     user = serializer.get_or_create()
 
     confirmation_code = default_token_generator.make_token(user)
