@@ -1,4 +1,6 @@
+from typing import Any
 from rest_framework import permissions
+from rest_framework.request import Request
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -7,7 +9,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     and delete operations. Non-admin users can only perform read operations.
     """
 
-    def has_permission(self, request, view) -> bool:
+    def has_permission(self, request: Request, view: Any) -> bool:
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -20,7 +22,7 @@ class IsModeratorOrReadOnly(permissions.BasePermission):
     Non-moderator users can only perform read operations.
     """
 
-    def has_permission(self, request, view) -> bool:
+    def has_permission(self, request: Request, view: Any) -> bool:
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -33,7 +35,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
     Non-owners can only perform read operations.
     """
 
-    def has_object_permission(self, request, view, obj) -> bool:
+    def has_object_permission(
+        self, request: Request, view: Any, obj: Any
+    ) -> bool:
         if request.method in permissions.SAFE_METHODS:
             return True
 
@@ -47,7 +51,7 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
     and to admin users based on their role. Superusers always have full rights.
     """
 
-    def has_permission(self, request, view) -> bool:
+    def has_permission(self, request: Request, view: Any) -> bool:
         # Superusers always have full access
         if request.user.is_superuser:
             return True
