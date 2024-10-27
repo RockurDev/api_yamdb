@@ -30,6 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsSuperuserOrAdmin]
     lookup_field = 'username'
+    search_fields = ('role',)
 
     @action(methods=['patch', 'get'], detail=False, url_path='me')
     def me(self, request: Request) -> Response:
