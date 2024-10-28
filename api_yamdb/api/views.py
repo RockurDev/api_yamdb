@@ -9,7 +9,7 @@ from users.permissions import (
     IsAdminOrReadOnly,
     IsModeratorOrReadOnly
 )
-from reviews.models import Category, Genre, Title, Comment
+from reviews.models import Category, Genre, Title, Comment, Review
 from api.serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -121,14 +121,22 @@ class TitleViewSet(BaseViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=False
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            instance,
+            data=request.data,
+            partial=True
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
@@ -162,22 +170,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def get_title(self) -> Title:
+    def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        return self.get_title().reviews
+        return self.get_title().reviews.all()
 
-    def perform_create(self, serializer) -> None:
-        # TODO: connect with custom user
-        # serializer.save(
-        #     title_id=self.kwargs.get('title_id'),
-        #     author=get_user_model().objects.get(pk=1),
-        # )
-        serializer.save(
-            title_id=self.kwargs.get('title_id'), author=self.request.user
-        )
+    def create(self, request, *args, **kwargs):
+        title = self.get_title()
+        serializer = self.get_serializer(title, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer, title)
+        return Response(serializer.data)
 
-    class Meta:
-        read_only_fields = ('author',)
+    def perform_create(self, serializer, title) -> None:
+        serializer.save(title=title, author=self.request.user)
