@@ -5,8 +5,12 @@ from users.permissions import (
     IsOwner,
     IsSuperuserOrAdmin,
     IsAdminOrReadOnly,
+    IsOwnerOrReadOnly,
+    IsModeratorOrReadOnly,
 )
-from reviews.models import Category, Genre, Review, Title, Comment
+
+from reviews.models import Category, Genre, Title, Review, Comment
+
 from api.serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -65,9 +69,10 @@ class CommentViewSet(viewsets.ModelViewSet):
     """ "Comment viewset."""
 
     queryset = Comment.objects.all()
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = [IsSuperuserOrAdmin | IsOwner]
     serializer_class = CommentSerializer
+    permission_classes = [IsSuperuserOrAdmin | IsOwner]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
     search_fields = ('text',)
 
     def perform_create(self, serializer) -> None:
@@ -78,6 +83,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=review_id)
 
         serializer.save(title=title, review=review, author=self.request.user)
+    
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -88,10 +94,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsSuperuserOrAdmin | IsOwner]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def perform_create(self, serializer) -> None:
+    def perform_create(self, serializer):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
         serializer.save(
-            title_id=self.kwargs.get('title_id'),
             author=self.request.user,
+            title=title
         )
 
     class Meta:
