@@ -64,4 +64,8 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(
         self, request: Request, view: Any, obj: Any
     ) -> bool:
-        return hasattr(obj, 'author') and request.user == obj.author
+        return (
+            request.user.is_authenticated
+            and hasattr(obj, 'author')
+            and request.user == obj.author
+        )
