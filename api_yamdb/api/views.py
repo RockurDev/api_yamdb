@@ -7,8 +7,9 @@ from users.permissions import (
     IsAdminOrReadOnly,
     IsOwner,
     IsOwnerOrReadOnly,
+    IsModeratorOrReadOnly,
 )
-from reviews.models import Category, Genre, Title, Comment
+from reviews.models import Category, Genre, Title, Comment, Review
 from api.serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -66,14 +67,25 @@ class CommentViewSet(viewsets.ModelViewSet):
     """ "Comment viewset."""
 
     queryset = Comment.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = CommentSerializer
     search_fields = ('text',)
 
-    def perform_create(self, serializer) -> None:
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
         serializer.save(
-            title_id=self.request.data.get('title_id'),
-            review_id=self.request.data.get('review_id'),
+            author=self.request.user,
+            review=review
         )
 
 
@@ -81,19 +93,23 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsSuperuserOrAdmin | IsOwner]
-    # lookup_field = 'title_id'
+    permission_classes = [IsModeratorOrReadOnly]
 
-    # def get_title(self) -> Title:
-    #     return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+    def get_queryset(self):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
+        return title.reviews.all()
 
-    # def get_queryset(self):
-    #     return self.get_title().reviews
-
-    def perform_create(self, serializer) -> None:
+    def perform_create(self, serializer):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
         serializer.save(
-            title_id=self.kwargs.get('title_id'),
             author=self.request.user,
+            title=title
         )
 
     class Meta:
