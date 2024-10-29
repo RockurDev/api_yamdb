@@ -34,22 +34,6 @@ class IsModeratorOrReadOnly(permissions.BasePermission):
         )
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Permission that allows users to edit or delete only their own content.
-    Non-owners can only perform read operations.
-    """
-
-    def has_object_permission(
-        self, request: Request, view: Any, obj: Any
-    ) -> bool:
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # Allow edit and delete only if the object belongs to the current user
-        return obj.author == request.user
-
-
 class IsSuperuserOrAdmin(permissions.BasePermission):
     """
     Permission that grants full access to superusers regardless of their role,
@@ -63,14 +47,3 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
 
         # Admins have full access
         return request.user.is_authenticated and request.user.is_admin
-
-
-class IsOwner(permissions.BasePermission):
-    def has_object_permission(
-        self, request: Request, view: Any, obj: Any
-    ) -> bool:
-        return (
-            request.user.is_authenticated
-            and hasattr(obj, 'author')
-            and request.user == obj.author
-        )
