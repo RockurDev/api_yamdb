@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from .filters import TitleFilter
 from users.permissions import (
@@ -79,7 +79,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [IsSuperuserOrAdmin | IsOwner]
+    permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     search_fields = ('text',)
@@ -92,7 +92,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(Review, id=review_id)
 
         serializer.save(title=title, review=review, author=self.request.user)
-    
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -100,7 +99,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsSuperuserOrAdmin | IsOwner]
+    permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
@@ -112,6 +111,3 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=title
         )
-
-    class Meta:
-        read_only_fields = ('author',)
