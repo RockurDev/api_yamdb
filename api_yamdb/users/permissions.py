@@ -1,6 +1,7 @@
 from typing import Any
 from rest_framework import permissions
 from rest_framework.request import Request
+from rest_framework.permissions import SAFE_METHODS
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
@@ -22,11 +23,16 @@ class IsModeratorOrReadOnly(permissions.BasePermission):
     Non-moderator users can only perform read operations.
     """
 
-    def has_permission(self, request: Request, view: Any) -> bool:
-        if request.method in permissions.SAFE_METHODS:
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
             return True
-
-        return request.user.is_authenticated and request.user.is_moderator
+        if request.method == 'POST':
+            return request.user.is_authenticated
+        return (request.user.is_authenticated and (
+            request.user == obj.author
+            or request.user.is_moderator
+            or request.user.is_admin
+        ))
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -64,4 +70,8 @@ class IsOwner(permissions.BasePermission):
     def has_object_permission(
         self, request: Request, view: Any, obj: Any
     ) -> bool:
-        return hasattr(obj, 'author') and request.user == obj.author
+        return (
+            request.user.is_authenticated
+            and hasattr(obj, 'author')
+            and request.user == obj.author
+        )
