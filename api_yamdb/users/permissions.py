@@ -1,7 +1,8 @@
 from typing import Any
+
 from rest_framework import permissions
-from rest_framework.request import Request
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.request import Request
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):

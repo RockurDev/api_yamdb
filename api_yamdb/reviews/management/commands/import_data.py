@@ -1,12 +1,11 @@
 import os
 
 import pandas as pd
-from django.core.management.base import BaseCommand
 from django.conf import settings
-
+from django.core.management.base import BaseCommand
+from users.models import CustomUser
 
 from reviews.models import Category, Comment, Genre, Review, Title
-from users.models import CustomUser
 
 
 def get_data_frame(data_dir, filename) -> pd.DataFrame:
