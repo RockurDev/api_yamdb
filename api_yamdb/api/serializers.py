@@ -1,9 +1,9 @@
 from typing import OrderedDict
+
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, Title, Review
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -90,18 +90,22 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         read_only_fields = ('author', 'title')
 
-    def validate(self, data):
-        """Валидация, если запрос пост."""
+    def validate(self, data) -> OrderedDict:
+        """Check if the user already left a review about this title."""
         request = self.context.get('request')
+
         if request.method != 'POST':
             return data
+
         title_id = self.context['view'].kwargs.get('title_id')
+
         if Review.objects.filter(
             title__id=title_id, author=request.user
         ).exists():
             raise serializers.ValidationError(
-                'Вы уже оставляли отзыв о данном произведении.'
+                'You have already left a review about this work.'
             )
+
         return data
 
 
