@@ -44,15 +44,21 @@ class BaseUserSerializer(serializers.ModelSerializer):
         username = data.get('username')
         email = data.get('email')
 
-        # Check if any user exists with the same username but different email
-        if (
-            User.objects.filter(username=username)
-            .exclude(email=email)
-            .exists()
-        ):
-            raise serializers.ValidationError(
-                {'username': 'Choose another username.'}
-            )
+        # Check if a user exists with the same username
+        if User.objects.filter(username=username).exists():
+            user = User.objects.get(username=username)
+
+            # If the email is not registred
+            if not User.objects.filter(email=email).exists():
+                raise serializers.ValidationError(
+                    {'username': 'Choose another username'}
+                )
+
+            # If the email does not match the registered user's email
+            if email != user.email:
+                raise serializers.ValidationError(
+                    {'username': 'Choose another username.', 'email': email}
+                )
 
         # Check if any user exists with the same email but different username
         if (
