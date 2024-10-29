@@ -58,3 +58,10 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
 
         # Admins have full access
         return request.user.is_authenticated and request.user.is_admin
+
+
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(
+        self, request: Request, view: Any, obj: Any
+    ) -> bool:
+        return hasattr(obj, 'author') and request.user == obj.author
