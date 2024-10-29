@@ -1,14 +1,12 @@
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 from users.permissions import (
+    IsOwner,
     IsSuperuserOrAdmin,
     IsAdminOrReadOnly,
-    IsOwner,
-    IsOwnerOrReadOnly,
 )
-from reviews.models import Category, Genre, Title, Comment
+from reviews.models import Category, Genre, Review, Title, Comment
 from api.serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -62,33 +60,33 @@ class TitleViewSet(viewsets.ModelViewSet):
     ]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
+
 class CommentViewSet(viewsets.ModelViewSet):
     """ "Comment viewset."""
 
     queryset = Comment.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsSuperuserOrAdmin | IsOwner]
     serializer_class = CommentSerializer
     search_fields = ('text',)
 
     def perform_create(self, serializer) -> None:
-        serializer.save(
-            title_id=self.request.data.get('title_id'),
-            review_id=self.request.data.get('review_id'),
-        )
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+
+        title = get_object_or_404(Title, id=title_id)
+        review = get_object_or_404(Review, id=review_id)
+
+        serializer.save(title=title, review=review, author=self.request.user)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
+    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsSuperuserOrAdmin | IsOwner]
-    # lookup_field = 'title_id'
-
-    # def get_title(self) -> Title:
-    #     return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-
-    # def get_queryset(self):
-    #     return self.get_title().reviews
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer) -> None:
         serializer.save(
