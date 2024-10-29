@@ -24,7 +24,7 @@ class IsModeratorOrReadOnly(permissions.BasePermission):
     Non-moderator users can only perform read operations.
     """
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view: Any, obj: Any) -> bool:
         if request.method in SAFE_METHODS:
             return True
 
