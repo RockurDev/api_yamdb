@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import filters, status, viewsets
+from rest_framework.response import Response
 
+from .filters import TitleFilter
 from users.permissions import (
     IsSuperuserOrAdmin,
     IsAdminOrReadOnly,
@@ -18,26 +20,30 @@ from api.serializers import (
 )
 
 
-class GenreViewSet(viewsets.ModelViewSet):
-    """Genre viewset."""
+class BaseViewSet(viewsets.ModelViewSet):
+    """Read only for retrieve in genre and category."""
 
-    queryset = Genre.objects.all().order_by('id')
     lookup_field = 'slug'
     permission_classes = [IsAdminOrReadOnly]
-    serializer_class = GenreSerializer
     search_fields = ('name',)
     http_method_names = ['get', 'post', 'delete']
 
+    def retrieve(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-class CategoryViewSet(viewsets.ModelViewSet):
+
+class GenreViewSet(BaseViewSet):
+    """Genre viewset."""
+
+    queryset = Genre.objects.all().order_by('id')
+    serializer_class = GenreSerializer
+
+
+class CategoryViewSet(BaseViewSet):
     """Category viewset."""
 
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
-    lookup_field = 'slug'
-    permission_classes = [IsAdminOrReadOnly]
-    search_fields = ('name',)
-    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -45,6 +51,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     queryset = Title.objects.all().order_by('id')
     permission_classes = [IsAdminOrReadOnly]
+    filterset_class = TitleFilter
     serializer_class = TitleSerializer
     search_fields = (
         'name',
@@ -61,6 +68,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         'genre__slug',
     ]
     http_method_names = ['get', 'post', 'patch', 'delete']
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     """ "Comment viewset."""
