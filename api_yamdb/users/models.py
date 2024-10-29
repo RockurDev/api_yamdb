@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.db import models
 
-
 ANONYM = 'anonym'
 USER = 'user'
 MODERATOR = 'moderator'

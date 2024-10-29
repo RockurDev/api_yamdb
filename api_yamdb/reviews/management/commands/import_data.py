@@ -86,11 +86,7 @@ class Command(BaseCommand):
                 bio=row['bio'],
                 first_name=row['first_name'],
                 last_name=row['last_name'],
-                defaults={
-                    'is_staff': True,
-                    'is_superuser': True
-                }
-
+                defaults={'is_staff': True, 'is_superuser': True},
             )
 
     def import_reviews(self, data_dir):
@@ -107,8 +103,8 @@ class Command(BaseCommand):
                     'text': row['text'],
                     'author': author,
                     'score': row['score'],
-                    'pub_date': row['pub_date']
-                }
+                    'pub_date': row['pub_date'],
+                },
             )
 
     def import_comments(self, data_dir):
@@ -125,5 +121,5 @@ class Command(BaseCommand):
                     'text': row['text'],
                     'pub_date': row['pub_date'],
                     'author': author,
-                }
+                },
             )
