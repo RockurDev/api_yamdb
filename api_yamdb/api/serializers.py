@@ -57,7 +57,7 @@ class TitleSerializer(serializers.ModelSerializer):
         average_rating = Review.objects.filter(title=obj).aggregate(
             Avg('score')
         )['score__avg']
-        return average_rating if average_rating is not None else None
+        return average_rating if average_rating else None
 
     def to_representation(self, instance) -> OrderedDict:
         """Custom representation to intercept and modify output."""
@@ -82,10 +82,12 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     """Review Serializer."""
 
+    author = serializers.StringRelatedField()
+
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date', 'title')
-        read_only_fields = ('author',)
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        read_only_fields = ('author', 'title')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -93,4 +95,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('title_id', 'review_id', 'text')
+        fields = ('text', 'author', 'pub_date')
+        read_only_fields = ('title_id', 'review_id', 'author', 'pub_date')
