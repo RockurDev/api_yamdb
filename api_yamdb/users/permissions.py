@@ -27,6 +27,7 @@ class IsModeratorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
+
         return request.user.is_authenticated and (
             request.user == obj.author
             or request.user.is_moderator
@@ -41,9 +42,7 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
     """
 
     def has_permission(self, request: Request, view: Any) -> bool:
-        # Superusers always have full access
         if request.user.is_superuser:
             return True
 
-        # Admins have full access
         return request.user.is_authenticated and request.user.is_admin
