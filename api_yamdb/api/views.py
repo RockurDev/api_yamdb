@@ -2,14 +2,12 @@ from django_filters.rest_framework import CharFilter, DjangoFilterBackend, Filte
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
-
 from users.permissions import (
-    IsSuperuserOrAdmin,
     IsOwnerOrReadOnly,
     IsAdminOrReadOnly,
-    IsModeratorOrReadOnly
+    IsModeratorOrReadOnly,
 )
-from reviews.models import Category, Genre, Title, Comment
+from reviews.models import Category, Genre, Title, Review
 from api.serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -78,7 +76,9 @@ class CategoryViewSet(BaseViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -121,14 +121,18 @@ class TitleViewSet(BaseViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=False
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
@@ -144,16 +148,24 @@ class TitleViewSet(BaseViewSet):
 
 class CommentViewSet(BaseViewSet):
     """ "Comment viewset."""
-
-    queryset = Comment.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
     serializer_class = CommentSerializer
-    search_fields = ('text',)
+    permission_classes = [IsModeratorOrReadOnly]
 
-    def perform_create(self, serializer) -> None:
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id')
+        )
         serializer.save(
-            title_id=self.request.data.get('title_id'),
-            review_id=self.request.data.get('review_id'),
+            author=self.request.user,
+            review=review
         )
 
 
@@ -161,22 +173,23 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsAdminOrReadOnly, IsOwnerOrReadOnly]
-
-    def get_title(self) -> Title:
-        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+    permission_classes = [IsModeratorOrReadOnly]
 
     def get_queryset(self):
-        return self.get_title().reviews
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
+        return title.reviews.all()
 
-    def perform_create(self, serializer) -> None:
-        # TODO: connect with custom user
-        # serializer.save(
-        #     title_id=self.kwargs.get('title_id'),
-        #     author=get_user_model().objects.get(pk=1),
-        # )
+    def perform_create(self, serializer):
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs.get('title_id')
+        )
         serializer.save(
-            title_id=self.kwargs.get('title_id'), author=self.request.user
+            author=self.request.user,
+            title=title
         )
 
     class Meta:

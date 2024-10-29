@@ -57,6 +57,7 @@ class Title(models.Model):
     description = models.TextField(
         max_length=256,
         verbose_name='Описание',
+        blank=True,
     )
     year = models.IntegerField(
         verbose_name='Год',
@@ -82,6 +83,12 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'category'],
+                name='unique_title_per_category'
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -127,7 +134,11 @@ class Review(models.Model):
 class Comment(models.Model):
     """Comment model."""
 
-    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name='Автор'
