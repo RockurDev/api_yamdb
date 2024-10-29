@@ -127,6 +127,7 @@ class Review(models.Model):
 class Comment(models.Model):
     """Comment model."""
 
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
     review = models.ForeignKey(Review, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
