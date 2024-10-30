@@ -14,7 +14,8 @@ User = get_user_model()
 class BaseUserSerializer(serializers.ModelSerializer):
     """
     A base class for user properties and methods.
-    This class does not inherit from models.Model, so no extra table is created.
+    This class does not inherit from models.Model,
+    so no extra table is created.
     """
 
     email = serializers.EmailField(required=True)
@@ -68,7 +69,9 @@ class BaseUserSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError(
                 {
-                    'email': 'This email is already registered with a different username.'
+                    'email': (
+                        'This email is already registered with a different username.'
+                    )
                 }
             )
 
