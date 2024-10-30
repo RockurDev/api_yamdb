@@ -70,7 +70,8 @@ class BaseUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {
                     'email': (
-                        'This email is already registered with a different username.'
+                        'This email is already registered '
+                        'with a different username.'
                     )
                 }
             )
