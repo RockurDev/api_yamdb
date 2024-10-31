@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from users.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
 
 from .filters import TitleFilter
@@ -48,20 +50,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = TitleFilter
     serializer_class = TitleSerializer
-    search_fields = (
-        'name',
-        'category__name',
-        'genre__name',
-        'genre__slug',
-        'year',
-    )
-    filterset_fields = [
-        'name',
-        'year',
-        'category__name',
-        'genre__name',
-        'genre__slug',
-    ]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
 
