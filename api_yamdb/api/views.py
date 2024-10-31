@@ -57,12 +57,14 @@ class TitleViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """ "Comment viewset."""
 
-    queryset = Comment.objects.all().order_by('-pub_date')
     serializer_class = CommentSerializer
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     search_fields = ('text',)
+
+    def get_queryset(self):
+        return Comment.objects.all().order_by('-pub_date')
 
     def perform_create(self, serializer: CommentSerializer) -> None:
         title_id = self.kwargs.get('title_id')
@@ -77,10 +79,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Review viewset."""
 
-    queryset = Review.objects.all().order_by('-pub_date')
     serializer_class = ReviewSerializer
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
     http_method_names = ('get', 'post', 'patch', 'delete')
+
+    def get_queryset(self):
+        return Review.objects.all().order_by('-pub_date')
 
     def perform_create(self, serializer: ReviewSerializer) -> None:
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
