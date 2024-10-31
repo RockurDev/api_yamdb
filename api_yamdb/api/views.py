@@ -87,6 +87,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Review.objects.all().order_by('-pub_date')
 
+
     def perform_create(self, serializer: ReviewSerializer) -> None:
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
