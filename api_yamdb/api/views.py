@@ -15,32 +15,23 @@ from .serializers import (
     TitleSerializer,
 )
 from reviews.models import Category, Comment, Genre, Review, Title
+from .mixins import GenreCategoryBaseViewSet
 
 
-class BaseViewSet(viewsets.ModelViewSet):
-    """Read only for retrieve in genre and category."""
-
-    lookup_field = 'slug'
-    permission_classes = [IsAdminOrReadOnly]
-    search_fields = ('name',)
-    http_method_names = ('get', 'post', 'delete')
-
-    def retrieve(self, *args, **kwargs) -> Response:
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-class GenreViewSet(BaseViewSet):
+class GenreViewSet(GenreCategoryBaseViewSet):
     """Genre viewset."""
 
     queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
-class CategoryViewSet(BaseViewSet):
+class CategoryViewSet(GenreCategoryBaseViewSet):
     """Category viewset."""
 
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class TitleViewSet(viewsets.ModelViewSet):
