@@ -2,6 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from users.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
 
 from .filters import TitleFilter
@@ -21,7 +23,7 @@ class BaseViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
     permission_classes = [IsAdminOrReadOnly]
     search_fields = ('name',)
-    http_method_names = ['get', 'post', 'delete']
+    http_method_names = ('get', 'post', 'delete')
 
     def retrieve(self, *args, **kwargs) -> Response:
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -48,21 +50,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = TitleFilter
     serializer_class = TitleSerializer
-    search_fields = (
-        'name',
-        'category__name',
-        'genre__name',
-        'genre__slug',
-        'year',
-    )
-    filterset_fields = [
-        'name',
-        'year',
-        'category__name',
-        'genre__name',
-        'genre__slug',
-    ]
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -71,7 +60,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-pub_date')
     serializer_class = CommentSerializer
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     search_fields = ('text',)
 
@@ -91,7 +80,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all().order_by('-pub_date')
     serializer_class = ReviewSerializer
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     def perform_create(self, serializer: ReviewSerializer) -> None:
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
