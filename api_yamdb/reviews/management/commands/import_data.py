@@ -114,10 +114,12 @@ class Command(BaseCommand):
         for _, row in df.iterrows():
             review = Review.objects.get(id=row['review_id'])
             author = CustomUser.objects.get(id=row['author'])
+            title = review.title
             Comment.objects.get_or_create(
                 id=row['id'],
                 review=review,
                 defaults={
+                    'title': title,
                     'text': row['text'],
                     'pub_date': row['pub_date'],
                     'author': author,
