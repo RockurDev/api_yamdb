@@ -46,7 +46,7 @@ class CategoryViewSet(BaseViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Title viewset."""
 
-    queryset = Title.objects.all().order_by('id')
+    queryset = Title.objects.all().order_by('name')
     permission_classes = [IsAdminOrReadOnly]
     filterset_class = TitleFilter
     serializer_class = TitleSerializer
