@@ -17,7 +17,8 @@ ROLE_CHOICES = [
 class BaseUser:
     """
     A base class for user properties and methods.
-    This class does not inherit from models.Model, so no extra table is created.
+    This class does not inherit from models.Model,
+    so no extra table is created.
     """
 
     @property

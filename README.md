@@ -132,4 +132,3 @@ Endpoint: `/api/v1/titles/{title_id}/reviews/{review_id}/comments/`
 ## Project Link
 
 [API for YAMDB](https://github.com/RockurDev/api_yamdb)
-```
