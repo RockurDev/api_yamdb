@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from users.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
+from api.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
 
 from .filters import TitleFilter
 from .serializers import (
