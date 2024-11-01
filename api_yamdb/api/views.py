@@ -122,7 +122,11 @@ class CommentViewSet(viewsets.ModelViewSet):
     search_fields = ('text',)
 
     def get_queryset(self):
-        return Comment.objects.all().order_by('-pub_date')
+        title_id = self.kwargs.get('title_id')
+        review_id = self.kwargs.get('review_id')
+        return Comment.objects.filter(
+            review_id=review_id, review__title_id=title_id
+        ).order_by('-pub_date')
 
     def perform_create(self, serializer: CommentSerializer) -> None:
         title_id = self.kwargs.get('title_id')
@@ -143,7 +147,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     def get_queryset(self):
-        return Review.objects.all().order_by('-pub_date')
+        title_id = self.kwargs.get('title_id')
+        return Review.objects.filter(title_id=title_id).order_by('-pub_date')
 
     def perform_create(self, serializer: ReviewSerializer) -> None:
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
