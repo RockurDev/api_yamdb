@@ -15,14 +15,10 @@ class BaseAdmin(admin.ModelAdmin):
 class GenreAdmin(BaseAdmin):
     """Admin model genre."""
 
-    pass
-
 
 @admin.register(Category)
 class CategoryAdmin(BaseAdmin):
     """Admin model category."""
-
-    pass
 
 
 @admin.register(Title)
