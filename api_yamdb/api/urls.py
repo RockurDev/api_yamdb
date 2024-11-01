@@ -26,12 +26,8 @@ router_v1.register(
     basename='comments',
 )
 
-v1_urlpatterns = [
-    path('', include(router_v1.urls)),
-    path('auth/signup/', signup, name='register'),
-    path('auth/token/', get_jwt_token, name='token'),
-]
-
 urlpatterns = [
-    path('v1/', include(v1_urlpatterns)),
+    path('v1/', include(router_v1.urls)),
+    path('v1/auth/signup/', signup, name='register'),
+    path('v1/auth/token/', get_jwt_token, name='token'),
 ]
