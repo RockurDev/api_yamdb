@@ -5,12 +5,12 @@ from users.validators import validate_username
 
 
 class User(AbstractUser):
-    """This model creates a custom user table in the database."""
+    """This model creates a user table in the database."""
 
     class Role(models.TextChoices):
-        USER = 'User'
-        MODERATOR = 'Moderator'
-        ADMIN = 'Admin'
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
     is_staff = models.BooleanField(verbose_name='Is Staff', default=False)
 
@@ -25,7 +25,7 @@ class User(AbstractUser):
     )
     bio = models.TextField(blank=True, verbose_name='Bio')
     role = models.CharField(
-        max_length=max(map(lambda role: len(role), Role.labels)),
+        max_length=max(map(len, Role.values)),
         choices=Role.choices,
         default=Role.USER,
         verbose_name='Role',
