@@ -8,7 +8,7 @@ from users.models import User
 from reviews.models import Category, Comment, Genre, Review, Title
 
 
-def get_data_frame(data_dir, filename) -> pd.DataFrame:
+def get_data_frame(data_dir: str, filename: str) -> pd.DataFrame:
     file_path = os.path.join(data_dir, filename)
     return pd.read_csv(file_path)
 
@@ -29,7 +29,7 @@ class Command(BaseCommand):
         self.import_reviews(data_dir)
         self.import_comments(data_dir)
 
-    def import_categories(self, data_dir) -> None:
+    def import_categories(self, data_dir: str) -> None:
         """Import categories into database."""
 
         df = get_data_frame(data_dir, 'category.csv')
@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 slug=row['slug'],
             )
 
-    def import_genres(self, data_dir) -> None:
+    def import_genres(self, data_dir: str) -> None:
         """Import genres into database."""
 
         df = get_data_frame(data_dir, 'genre.csv')
@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 slug=row['slug'],
             )
 
-    def import_titles(self, data_dir) -> None:
+    def import_titles(self, data_dir: str) -> None:
         """Import titles into database."""
 
         df = get_data_frame(data_dir, 'titles.csv')
@@ -64,7 +64,7 @@ class Command(BaseCommand):
                 category=category,
             )
 
-    def import_genre_titles(self, data_dir) -> None:
+    def import_genre_titles(self, data_dir: str) -> None:
         """Import genre title into database."""
 
         df = get_data_frame(data_dir, 'genre_title.csv')
@@ -73,7 +73,7 @@ class Command(BaseCommand):
             genre = Genre.objects.get(id=row['genre_id'])
             title.genre.add(genre)
 
-    def import_users(self, data_dir) -> None:
+    def import_users(self, data_dir: str) -> None:
         """Import users into database."""
 
         df = get_data_frame(data_dir, 'users.csv')
@@ -89,7 +89,7 @@ class Command(BaseCommand):
                 defaults={'is_staff': True, 'is_superuser': True},
             )
 
-    def import_reviews(self, data_dir) -> None:
+    def import_reviews(self, data_dir: str) -> None:
         """Import reviews into database."""
 
         df = get_data_frame(data_dir, 'review.csv')
@@ -107,7 +107,7 @@ class Command(BaseCommand):
                 },
             )
 
-    def import_comments(self, data_dir):
+    def import_comments(self, data_dir: str) -> None:
         """Import comments into database."""
 
         df = get_data_frame(data_dir, 'comments.csv')
