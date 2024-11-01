@@ -1,11 +1,14 @@
-import re
 from typing import OrderedDict
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+from users.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH
+from users.validators import validate_username
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -126,75 +129,58 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('pub_date',)
 
 
-class BaseUserSerializer(serializers.ModelSerializer):
-    """
-    A base class for user properties and methods.
-    This class does not inherit from models.Model,
-    so no extra table is created.
-    """
+class UserSignUpSerializer(serializers.Serializer):
+    """A base class for user properties and methods."""
 
-    email = serializers.EmailField(required=True)
-    username = serializers.CharField(required=True)
-
-    def validate_email(self, value: str) -> str:
-        if len(value) > 254:
-            raise serializers.ValidationError(
-                {'email': 'Choose another email'}
-            )
-        return value
-
-    def validate_username(self, value: str) -> str:
-        if len(value) > 150 or value == 'me':
-            raise serializers.ValidationError(
-                {'username': 'Choose another username'}
-            )
-
-        if not re.match(r'^[\w.@+-]+$', value):
-            raise serializers.ValidationError(
-                'Username contains not allowed symbols'
-            )
-
-        return value
+    email = serializers.EmailField(required=True, max_length=MAX_EMAIL_LENGTH)
+    username = serializers.CharField(
+        required=True,
+        validators=[validate_username],
+        max_length=MAX_USERNAME_LENGTH,
+    )
 
     def validate(self, data: OrderedDict) -> OrderedDict:
         username = data.get('username')
         email = data.get('email')
 
-        # Check if a user exists with the same username
-        if User.objects.filter(username=username).exists():
-            user = User.objects.get(username=username)
+        user_by_username = User.objects.filter(username=username).first()
+        user_by_email = User.objects.filter(email=email).first()
 
-            # If the email is not registred
-            if not User.objects.filter(email=email).exists():
+        if user_by_username:
+            if user_by_email is None or user_by_email.email != email:
                 raise serializers.ValidationError(
-                    {'username': 'Choose another username'}
+                    {'username': 'Choose another username.'}
                 )
-
-            # If the email does not match the registered user's email
-            if email != user.email:
+        else:
+            if user_by_email and user_by_email.username != username:
                 raise serializers.ValidationError(
-                    {'username': 'Choose another username.', 'email': email}
+                    {
+                        'email': (
+                            'This email is already registered '
+                            'with a different username.'
+                        )
+                    }
                 )
-
-        # Check if any user exists with the same email but different username
-        if (
-            User.objects.filter(email=email)
-            .exclude(username=username)
-            .exists()
-        ):
-            raise serializers.ValidationError(
-                {
-                    'email': (
-                        'This email is already registered '
-                        'with a different username.'
-                    )
-                }
-            )
 
         return data
 
+    def create(self, validated_data):
+        user, _ = User.objects.get_or_create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+        )
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            'API_YAMDB. Confirmation code',
+            f'Your confirmation code: {confirmation_code}',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+        return user
 
-class UserSerializer(BaseUserSerializer):
+
+class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the User model to transform User instances
     to and from JSON. This covers fields like first name, last name,
@@ -213,7 +199,7 @@ class UserSerializer(BaseUserSerializer):
         )
 
 
-class UserAccessTokenSerializer(serializers.ModelSerializer):
+class UserAccessTokenSerializer(serializers.Serializer):
     """
     Serializer for handling user access token validation.
     Expects a username and a confirmation code as input.
