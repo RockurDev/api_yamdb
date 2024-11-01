@@ -39,6 +39,6 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
     and to admin users based on their role. Superusers always have full rights.
     """
 
-    def has_permission(self, request: Request, view: Any) -> bool:
+    def has_permission(self, request: Request, view):
 
         return request.user.is_authenticated and request.user.is_admin
