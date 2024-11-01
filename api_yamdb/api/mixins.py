@@ -7,6 +7,8 @@ class GenreCategoryBaseViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Mixin class for genre, category viewsets."""
+
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']

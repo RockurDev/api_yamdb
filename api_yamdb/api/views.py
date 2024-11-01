@@ -30,7 +30,7 @@ from reviews.models import Category, Comment, Genre, Review, Title
 User = get_user_model()
 
 
-# Users
+
 @api_view(['POST'])
 def signup(request: Request) -> Response:
     serializer = UserSignUpSerializer(data=request.data)
@@ -84,7 +84,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# Models
 class GenreViewSet(GenreCategoryBaseViewSet):
     """Genre viewset."""
 
@@ -113,7 +112,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """ "Comment viewset."""
+    """Comment viewset."""
 
     serializer_class = CommentSerializer
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
