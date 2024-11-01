@@ -1,25 +1,23 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
+
+from reviews.validators import year_validator
+from reviews.constants import MAX_TEXT, MAX_TEXT_LENGTH
 
 User = get_user_model()
-
-MAX_TEXT_LENGTH = 40
 
 
 class BaseModel(models.Model):
     """Basemodel for genre, category."""
 
     name = models.CharField(
-        max_length=256,
-        blank=False,
+        max_length=MAX_TEXT,
         verbose_name='Название',
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=MAX_TEXT_LENGTH,
         unique=True,
-        blank=False,
         verbose_name='Слаг',
     )
 
@@ -34,7 +32,7 @@ class BaseModel(models.Model):
 class Genre(BaseModel):
     """Model Genre."""
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -42,7 +40,7 @@ class Genre(BaseModel):
 class Category(BaseModel):
     """Model Category."""
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -51,19 +49,17 @@ class Title(models.Model):
     """Model Title."""
 
     name = models.CharField(
-        max_length=100,
+        max_length=MAX_TEXT,
         verbose_name='Название',
     )
     description = models.TextField(
-        max_length=256,
+        blank=True,
+        null=True,
         verbose_name='Описание',
     )
-    year = models.IntegerField(
+    year = models.SmallIntegerField(
+        validators=[year_validator],
         verbose_name='Год',
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(timezone.now().year),
-        ],
     )
     category = models.ForeignKey(
         Category,
@@ -74,7 +70,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        blank=False,
         verbose_name='Жанр',
         related_name='titles',
     )
@@ -103,8 +98,12 @@ class Review(models.Model):
         verbose_name='Автор',
         related_name='reviews',
     )
-    score = models.SmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    score = models.IntegerField(
+        null=True,
+        validators=[
+            MaxValueValidator(10, message='Оценка должна быть не выше 10'),
+            MinValueValidator(1, message='Оценка должна быть не ниже 1')
+        ],
         verbose_name='Оценка',
     )
     pub_date = models.DateTimeField(
@@ -144,3 +143,6 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text[MAX_TEXT_LENGTH]
