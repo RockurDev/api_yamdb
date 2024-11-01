@@ -3,15 +3,14 @@ from typing import OrderedDict
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
-from users.models import CustomUser
-
 User = get_user_model()
+
 
 class GenreSerializer(serializers.ModelSerializer):
     """Genre Serializer."""
@@ -212,24 +211,6 @@ class UserSerializer(BaseUserSerializer):
             'last_name',
             'bio',
         )
-
-
-class UserCreationSerializer(BaseUserSerializer):
-    """
-    Serializer to handle user creation. Expects an email and username as input.
-    """
-
-    def get_or_create(self) -> CustomUser:
-        instance, _ = User.objects.get_or_create(
-            username=self.validated_data['username'],
-            email=self.validated_data['email'],
-        )
-        return instance
-
-    class Meta:
-        model = User
-        fields = ['email', 'username']
-        extra_kwargs = {'password': {'write_only': True}}
 
 
 class UserAccessTokenSerializer(serializers.ModelSerializer):
