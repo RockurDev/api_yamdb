@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from reviews.constants import MAX_NAME_LENGTH, MAX_TEXT_LENGTH
-from reviews.validators import year_validator
+from reviews.validators import validate_past_year
 
 User = get_user_model()
 
@@ -58,7 +58,7 @@ class Title(models.Model):
         verbose_name='Описание',
     )
     year = models.SmallIntegerField(
-        validators=[year_validator],
+        validators=[validate_past_year],
         verbose_name='Год',
     )
     category = models.ForeignKey(
