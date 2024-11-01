@@ -79,7 +79,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def __str__(self) -> str:
-        return self.name
+        return self.name[:MAX_NAME_LENGTH]
 
 
 class Review(models.Model):
@@ -129,10 +129,12 @@ class Comment(models.Model):
     """Comment model."""
 
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='comments'
+        Title, on_delete=models.CASCADE,
+        related_name='comments', verbose_name='Произведение'
     )
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        Review, on_delete=models.CASCADE,
+        related_name='comments', verbose_name='Отзыв'
     )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
