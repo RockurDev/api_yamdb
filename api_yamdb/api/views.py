@@ -1,7 +1,4 @@
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets
@@ -19,6 +16,7 @@ from .filters import TitleFilter
 from .mixins import GenreCategoryBaseViewSet
 from .permissions import IsSuperuserOrAdmin
 from .serializers import (
+    UserSignUpSerializer,
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
@@ -35,25 +33,11 @@ User = get_user_model()
 # Users
 @api_view(['POST'])
 def signup(request: Request) -> Response:
-    serializer = UserSerializer(data=request.data)
-    # serializer = UserCreationSerializer(data=request.data)
+    serializer = UserSignUpSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-
-    # If the user does not exists and requests confirmation code
-    user = serializer.get_or_create()
-
-    confirmation_code = default_token_generator.make_token(user)
-
-    send_mail(
-        'API_YAMDB. Confirmation code',
-        f'Your confirmation code: {confirmation_code}',
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
-
+    serializer.save()
     return Response(
-        {'username': user.username, 'email': user.email},
+        {'username': request.data['username'], 'email': request.data['email']},
         status=status.HTTP_200_OK,
     )
 
