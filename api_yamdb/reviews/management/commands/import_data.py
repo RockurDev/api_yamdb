@@ -3,7 +3,7 @@ import os
 import pandas as pd
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from users.models import CustomUser
+from users.models import User
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -73,12 +73,12 @@ class Command(BaseCommand):
             genre = Genre.objects.get(id=row['genre_id'])
             title.genre.add(genre)
 
-    def import_users(self, data_dir):
+    def import_users(self, data_dir) -> None:
         """Import users into database."""
 
         df = get_data_frame(data_dir, 'users.csv')
         for _, row in df.iterrows():
-            CustomUser.objects.get_or_create(
+            User.objects.get_or_create(
                 id=row['id'],
                 username=row['username'],
                 email=row['email'],
@@ -89,13 +89,13 @@ class Command(BaseCommand):
                 defaults={'is_staff': True, 'is_superuser': True},
             )
 
-    def import_reviews(self, data_dir):
+    def import_reviews(self, data_dir) -> None:
         """Import reviews into database."""
 
         df = get_data_frame(data_dir, 'review.csv')
         for _, row in df.iterrows():
             title = Title.objects.get(id=row['title_id'])
-            author = CustomUser.objects.get(id=row['author'])
+            author = User.objects.get(id=row['author'])
             Review.objects.get_or_create(
                 id=row['id'],
                 defaults={
@@ -113,7 +113,7 @@ class Command(BaseCommand):
         df = get_data_frame(data_dir, 'comments.csv')
         for _, row in df.iterrows():
             review = Review.objects.get(id=row['review_id'])
-            author = CustomUser.objects.get(id=row['author'])
+            author = User.objects.get(id=row['author'])
             title = review.title
             Comment.objects.get_or_create(
                 id=row['id'],
