@@ -6,12 +6,12 @@ from django.core.exceptions import ValidationError
 
 characters_validator = RegexValidator(
     r'^[-a-zA-Z0-9_]+$',
-    'Символы латинского алфавита, цифры и знак подчёркивания'
+    'Latin alphabet symbols, numbers and underscore'
 )
 
 
 def year_validator(value):
     if value > timezone.now().year:
         raise ValidationError(
-            'Пожалуйста, введите корректный год!'
+            'Please enter a valid year!'
         )

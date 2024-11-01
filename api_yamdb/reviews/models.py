@@ -3,7 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from reviews.validators import year_validator
-from reviews.constants import MAX_TEXT, MAX_TEXT_LENGTH
+from reviews.constants import MAX_NAME_LENGTH, MAX_TEXT_LENGTH
 
 User = get_user_model()
 
@@ -12,7 +12,7 @@ class BaseModel(models.Model):
     """Basemodel for genre, category."""
 
     name = models.CharField(
-        max_length=MAX_TEXT,
+        max_length=MAX_NAME_LENGTH,
         verbose_name='Название',
     )
     slug = models.SlugField(
@@ -49,7 +49,7 @@ class Title(models.Model):
     """Model Title."""
 
     name = models.CharField(
-        max_length=MAX_TEXT,
+        max_length=MAX_NAME_LENGTH,
         verbose_name='Название',
     )
     description = models.TextField(
@@ -101,8 +101,10 @@ class Review(models.Model):
     score = models.IntegerField(
         null=True,
         validators=[
-            MaxValueValidator(10, message='Оценка должна быть не выше 10'),
-            MinValueValidator(1, message='Оценка должна быть не ниже 1')
+            MaxValueValidator(
+                10, message='The rating should not be higher than 10'
+            ),
+            MinValueValidator(1, message='The rating must be at least 1')
         ],
         verbose_name='Оценка',
     )
