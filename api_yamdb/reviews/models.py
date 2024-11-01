@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.validators import year_validator
 from reviews.constants import MAX_NAME_LENGTH, MAX_TEXT_LENGTH
+from reviews.validators import year_validator
 
 User = get_user_model()
 
@@ -104,7 +104,7 @@ class Review(models.Model):
             MaxValueValidator(
                 10, message='The rating should not be higher than 10'
             ),
-            MinValueValidator(1, message='The rating must be at least 1')
+            MinValueValidator(1, message='The rating must be at least 1'),
         ],
         verbose_name='Оценка',
     )
@@ -129,14 +129,17 @@ class Comment(models.Model):
     """Comment model."""
 
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, related_name='comments')
+        Title, on_delete=models.CASCADE, related_name='comments'
+    )
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments')
+        Review, on_delete=models.CASCADE, related_name='comments'
+    )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE,
+        User,
+        on_delete=models.CASCADE,
         verbose_name='Автор',
-        related_name='comments'
+        related_name='comments',
     )
     pub_date = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата публикации'
@@ -146,5 +149,5 @@ class Comment(models.Model):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text[MAX_TEXT_LENGTH]
