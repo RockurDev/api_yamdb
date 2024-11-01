@@ -11,7 +11,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     and delete operations. Non-admin users can only perform read operations.
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         return request.method in SAFE_METHODS or (
             request.user.is_authenticated and request.user.is_admin)
 
@@ -39,6 +39,6 @@ class IsSuperuserOrAdmin(permissions.BasePermission):
     and to admin users based on their role. Superusers always have full rights.
     """
 
-    def has_permission(self, request: Request, view):
+    def has_permission(self, request: Request, view) -> bool:
 
         return request.user.is_authenticated and request.user.is_admin
