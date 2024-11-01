@@ -16,12 +16,12 @@ from .filters import TitleFilter
 from .mixins import GenreCategoryBaseViewSet
 from .permissions import IsSuperuserOrAdmin
 from .serializers import (
-    UserSignUpSerializer,
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
     ReviewSerializer,
     TitleSerializer,
+    UserSignUpSerializer,
 )
 from api.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
 from api.serializers import UserAccessTokenSerializer, UserSerializer
