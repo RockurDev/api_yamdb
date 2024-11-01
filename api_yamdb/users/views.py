@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from .permissions import IsSuperuserOrAdmin
-from .serializers import (
+from api.serializers import (
     UserAccessTokenSerializer,
     UserCreationSerializer,
     UserSerializer,
