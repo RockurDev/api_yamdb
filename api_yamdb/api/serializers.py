@@ -126,7 +126,6 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-        read_only_fields = ('pub_date',)
 
 
 class UserSignUpSerializer(serializers.Serializer):
@@ -146,13 +145,12 @@ class UserSignUpSerializer(serializers.Serializer):
         user_by_username = User.objects.filter(username=username).first()
         user_by_email = User.objects.filter(email=email).first()
 
-        if user_by_username:
-            if user_by_email is None or user_by_email.email != email:
+        if user_by_username != user_by_email:
+            if user_by_username:
                 raise serializers.ValidationError(
                     {'username': 'Choose another username.'}
                 )
-        else:
-            if user_by_email and user_by_email.username != username:
+            if user_by_email:
                 raise serializers.ValidationError(
                     {
                         'email': (
