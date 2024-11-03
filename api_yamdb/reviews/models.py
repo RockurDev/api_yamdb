@@ -130,6 +130,7 @@ class Review(models.Model):
                 fields=['title', 'author'], name='unique_review'
             )
         ]
+        ordering = ['-pub_date']
 
 
 class Comment(models.Model):
@@ -157,6 +158,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ['-pub_date']
 
     def __str__(self) -> str:
         return self.text[MAX_TEXT_LENGTH]
