@@ -128,7 +128,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 def send_confirmation_email(user, confirmation_code: str) -> None:
     """Send email with confirmation code to user."""
-    
+
     send_mail(
         'API_YAMDB. Confirmation code',
         f'Your confirmation code: {confirmation_code}',
