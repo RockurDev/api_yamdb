@@ -4,14 +4,13 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH
 from users.validators import validate_username
-
 
 User = get_user_model()
 
@@ -37,6 +36,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
+    rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Title
@@ -44,6 +44,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'year',
+            'rating',
             'description',
             'genre',
             'category',
@@ -58,12 +59,11 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Genre.objects.all(),
         many=True,
         allow_null=False,
-        allow_empty=False
+        allow_empty=False,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
-    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
@@ -71,26 +71,15 @@ class TitleSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'year',
-            'rating',
             'description',
             'genre',
             'category',
         )
 
-    def get_rating(self, obj) -> float:
-        average_rating = Review.objects.filter(title=obj).aggregate(
-            Avg('score')
-        )['score__avg']
-        return average_rating if average_rating else None
-
     def to_representation(self, instance) -> OrderedDict:
         """Custom representation to intercept and modify output."""
-        representation = super().to_representation(instance)
 
-        read_serializer = TitleReadSerializer(instance)
-        representation = read_serializer.data
-
-        return representation
+        return TitleReadSerializer(instance).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -107,6 +96,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data) -> OrderedDict:
         """Check if the user already left a review about this title."""
+
         request = self.context.get('request')
 
         if request.method != 'POST':
@@ -136,6 +126,18 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date')
 
 
+def send_confirmation_email(user, confirmation_code: str) -> None:
+    """Send email with confirmation code to user."""
+    
+    send_mail(
+        'API_YAMDB. Confirmation code',
+        f'Your confirmation code: {confirmation_code}',
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+
+
 class UserSignUpSerializer(serializers.Serializer):
     """A base class for user properties and methods."""
 
@@ -147,6 +149,10 @@ class UserSignUpSerializer(serializers.Serializer):
     )
 
     def validate(self, data: OrderedDict) -> OrderedDict:
+        """
+        Validates the provided username and email against existing users.
+        """
+
         username = data.get('username')
         email = data.get('email')
 
@@ -176,13 +182,7 @@ class UserSignUpSerializer(serializers.Serializer):
             email=validated_data['email'],
         )
         confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            'API_YAMDB. Confirmation code',
-            f'Your confirmation code: {confirmation_code}',
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
+        send_confirmation_email(user, confirmation_code)
         return user
 
 
@@ -217,6 +217,11 @@ class UserAccessTokenSerializer(serializers.Serializer):
     confirmation_code = serializers.CharField(required=True)
 
     def validate(self, data: OrderedDict) -> OrderedDict:
+        """
+        Validates the confirmation code
+        against the stored token for the user.
+        """
+
         user = get_object_or_404(User, username=data['username'])
 
         if not default_token_generator.check_token(
