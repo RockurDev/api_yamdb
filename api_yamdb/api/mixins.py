@@ -1,5 +1,7 @@
 from rest_framework import filters, mixins, viewsets
 
+from .permissions import IsAdminOrReadOnly
+
 
 class GenreCategoryBaseViewSet(
     mixins.ListModelMixin,
@@ -12,3 +14,4 @@ class GenreCategoryBaseViewSet(
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['name']
+    permission_classes = [IsAdminOrReadOnly]
