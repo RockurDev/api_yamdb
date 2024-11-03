@@ -30,7 +30,6 @@ from reviews.models import Category, Comment, Genre, Review, Title
 User = get_user_model()
 
 
-
 @api_view(['POST'])
 def signup(request: Request) -> Response:
     serializer = UserSignUpSerializer(data=request.data)
