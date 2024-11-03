@@ -1,6 +1,6 @@
 [project]
 name = 'YaMDb'
-version = '0.1.1'
+version = '0.1.2'
 description = 'The YaMDb project collects users feedback on various content'
 readme = 'README.md'
 requires-python = '==3.9.13'
@@ -44,7 +44,7 @@ include_trailing_comma = true
 # Define import groups
 known_django = ["django"]
 known_third_party = ["rest_framework"]
-known_local_folder = ["api", "reviews", "api_yamdb"]
+known_local_folder = ["api", "users", "reviews", "api_yamdb"]
 
 sections = ["STDLIB", "DJANGO", "THIRDPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
