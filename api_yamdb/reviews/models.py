@@ -4,8 +4,8 @@ from django.db import models
 
 from reviews.constants import (
     MAX_NAME_LENGTH,
-    MAX_TEXT_LENGTH,
     MAX_NUMB,
+    MAX_TEXT_LENGTH,
     MIN_NUMB,
 )
 from reviews.validators import validate_past_year
@@ -137,12 +137,16 @@ class Comment(models.Model):
     """Comment model."""
 
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE,
-        related_name='comments', verbose_name='Произведение'
+        Title,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Произведение',
     )
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE,
-        related_name='comments', verbose_name='Отзыв'
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Отзыв',
     )
     text = models.TextField(verbose_name='Текст')
     author = models.ForeignKey(
