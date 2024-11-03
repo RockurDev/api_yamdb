@@ -40,7 +40,11 @@ combine_as_imports = true
 skip_gitignore = true
 skip = ["migrations", "tests"]
 include_trailing_comma = true
-known_local_folder = ['api', 'reviews', 'api_yamdb']
-known_third_party = ["django", "rest_framework"]
-sections = ["STDLIB", "THIRDPARTY", "LOCALFOLDER"]
+
+# Define import groups
+known_django = ["django"]
+known_third_party = ["rest_framework"]
+known_local_folder = ["api", "reviews", "api_yamdb"]
+
+sections = ["STDLIB", "DJANGO", "THIRDPARTY", "LOCALFOLDER"]
 default_section = "THIRDPARTY"
