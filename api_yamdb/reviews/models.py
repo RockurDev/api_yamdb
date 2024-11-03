@@ -2,7 +2,12 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.constants import MAX_NAME_LENGTH, MAX_TEXT_LENGTH
+from reviews.constants import (
+    MAX_NAME_LENGTH,
+    MAX_TEXT_LENGTH,
+    MAX_NUMB,
+    MIN_NUMB,
+)
 from reviews.validators import validate_past_year
 
 User = get_user_model()
@@ -26,7 +31,7 @@ class BaseModel(models.Model):
         abstract = True
 
     def __str__(self) -> str:
-        return self.name
+        return self.name[:MAX_NAME_LENGTH]
 
 
 class Genre(BaseModel):
@@ -54,7 +59,6 @@ class Title(models.Model):
     )
     description = models.TextField(
         blank=True,
-        null=True,
         verbose_name='Описание',
     )
     year = models.SmallIntegerField(
@@ -77,6 +81,7 @@ class Title(models.Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        ordering = ['name']
 
     def __str__(self) -> str:
         return self.name[:MAX_NAME_LENGTH]
@@ -102,9 +107,11 @@ class Review(models.Model):
         null=True,
         validators=[
             MaxValueValidator(
-                10, message='The rating should not be higher than 10'
+                MAX_NUMB, message='The rating should not be higher than 10'
             ),
-            MinValueValidator(1, message='The rating must be at least 1'),
+            MinValueValidator(
+                MIN_NUMB, message='The rating must be at least 1'
+            ),
         ],
         verbose_name='Оценка',
     )
@@ -123,6 +130,7 @@ class Review(models.Model):
                 fields=['title', 'author'], name='unique_review'
             )
         ]
+        ordering = ['-pub_date']
 
 
 class Comment(models.Model):
@@ -150,6 +158,7 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ['-pub_date']
 
     def __str__(self) -> str:
         return self.text[MAX_TEXT_LENGTH]

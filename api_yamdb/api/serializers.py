@@ -7,10 +7,11 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
+
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH
 from users.validators import validate_username
 
-from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -31,6 +32,24 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+class TitleReadSerializer(serializers.ModelSerializer):
+    """Serializer for reading Title."""
+
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'category',
+        )
+
+
 class TitleSerializer(serializers.ModelSerializer):
     """Serializer for Title."""
 
@@ -38,11 +57,12 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True,
+        allow_null=False,
+        allow_empty=False
     )
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
-    description = serializers.CharField(required=False)
     rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -57,12 +77,6 @@ class TitleSerializer(serializers.ModelSerializer):
             'category',
         )
 
-    def validate_genre(self, value: list) -> list:
-        """Ensure that genre list is not empty."""
-        if not value:
-            raise serializers.ValidationError('This field must not be empty.')
-        return value
-
     def get_rating(self, obj) -> float:
         average_rating = Review.objects.filter(title=obj).aggregate(
             Avg('score')
@@ -73,18 +87,8 @@ class TitleSerializer(serializers.ModelSerializer):
         """Custom representation to intercept and modify output."""
         representation = super().to_representation(instance)
 
-        representation['category'] = {
-            'name': instance.category.name,
-            'slug': instance.category.slug,
-        }
-
-        representation['genre'] = [
-            {
-                'name': genre.name,
-                'slug': genre.slug,
-            }
-            for genre in instance.genre.all()
-        ]
+        read_serializer = TitleReadSerializer(instance)
+        representation = read_serializer.data
 
         return representation
 
@@ -92,12 +96,14 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     """Review Serializer."""
 
-    author = serializers.StringRelatedField(read_only=True)
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
 
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date')
-        read_only_fields = ('author', 'title')
+        read_only_fields = ('author',)
 
     def validate(self, data) -> OrderedDict:
         """Check if the user already left a review about this title."""
@@ -121,7 +127,9 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """Comment Serializer."""
 
-    author = serializers.SlugRelatedField(read_only=True)
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
 
     class Meta:
         model = Comment
@@ -145,13 +153,12 @@ class UserSignUpSerializer(serializers.Serializer):
         user_by_username = User.objects.filter(username=username).first()
         user_by_email = User.objects.filter(email=email).first()
 
-        if user_by_username:
-            if user_by_email is None or user_by_email.email != email:
+        if user_by_username != user_by_email:
+            if user_by_username:
                 raise serializers.ValidationError(
                     {'username': 'Choose another username.'}
                 )
-        else:
-            if user_by_email and user_by_email.username != username:
+            if user_by_email:
                 raise serializers.ValidationError(
                     {
                         'email': (
