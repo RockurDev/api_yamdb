@@ -148,25 +148,22 @@ class UserSignUpSerializer(serializers.Serializer):
 
         validation_errors = {}
 
-        # Check if both username and email exist but refer to different users
+        # Check if both username and email belong to the same user
         if (
             user_by_username
             and user_by_email
-            and user_by_username != user_by_email
+            and user_by_username.id == user_by_email.id
         ):
+            return data
+
+        # Check if the username exists
+        if user_by_username:
             validation_errors.update(
-                {
-                    'username': 'This username is already registered',
-                    'email': 'This email is already registered with a different username.',
-                }
+                {'username': 'This username is already registered'}
             )
 
-        # Check if the username exists and email is not in use
-        elif user_by_username and not user_by_email:
-            validation_errors.update({'username': 'Choose another username.'})
-
-        # Check if the email is registered but username is not in use
-        elif user_by_email and not user_by_username:
+        # Check if the email is registered
+        if user_by_email:
             validation_errors.update(
                 {
                     'email': 'This email is already registered with a different username.'
@@ -180,8 +177,8 @@ class UserSignUpSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user, _ = User.objects.get_or_create(
-            username=validated_data['username'],
-            email=validated_data['email'],
+            username=validated_data.get('username'),
+            email=validated_data.get('email'),
         )
         confirmation_code = default_token_generator.make_token(user)
         send_confirmation_email(user, confirmation_code)
