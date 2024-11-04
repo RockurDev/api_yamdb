@@ -1,13 +1,12 @@
 from typing import OrderedDict
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+from api.utils import send_confirmation_email
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.constants import MAX_EMAIL_LENGTH, MAX_USERNAME_LENGTH
 from users.validators import validate_username
@@ -126,18 +125,6 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date')
 
 
-def send_confirmation_email(user, confirmation_code: str) -> None:
-    """Send email with confirmation code to user."""
-
-    send_mail(
-        'API_YAMDB. Confirmation code',
-        f'Your confirmation code: {confirmation_code}',
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
-
-
 class UserSignUpSerializer(serializers.Serializer):
     """A base class for user properties and methods."""
 
@@ -159,20 +146,35 @@ class UserSignUpSerializer(serializers.Serializer):
         user_by_username = User.objects.filter(username=username).first()
         user_by_email = User.objects.filter(email=email).first()
 
-        if user_by_username != user_by_email:
-            if user_by_username:
-                raise serializers.ValidationError(
-                    {'username': 'Choose another username.'}
-                )
-            if user_by_email:
-                raise serializers.ValidationError(
-                    {
-                        'email': (
-                            'This email is already registered '
-                            'with a different username.'
-                        )
-                    }
-                )
+        validation_errors = {}
+
+        # Check if both username and email exist but refer to different users
+        if (
+            user_by_username
+            and user_by_email
+            and user_by_username != user_by_email
+        ):
+            validation_errors.update(
+                {
+                    'username': 'This username is already registered',
+                    'email': 'This email is already registered with a different username.',
+                }
+            )
+
+        # Check if the username exists and email is not in use
+        elif user_by_username and not user_by_email:
+            validation_errors.update({'username': 'Choose another username.'})
+
+        # Check if the email is registered but username is not in use
+        elif user_by_email and not user_by_username:
+            validation_errors.update(
+                {
+                    'email': 'This email is already registered with a different username.'
+                }
+            )
+
+        if validation_errors:
+            raise serializers.ValidationError(validation_errors)
 
         return data
 
