@@ -166,7 +166,10 @@ class UserSignUpSerializer(serializers.Serializer):
         if user_by_email:
             validation_errors.update(
                 {
-                    'email': 'This email is already registered with a different username.'
+                    'email': (
+                        'This email is already registered '
+                        'with a different username.'
+                    )
                 }
             )
 

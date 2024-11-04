@@ -27,7 +27,7 @@ from .serializers import (
 )
 from api.permissions import IsAdminOrReadOnly, IsModeratorOrReadOnly
 from api.serializers import UserAccessTokenSerializer, UserSerializer
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title
 
 User = get_user_model()
 
