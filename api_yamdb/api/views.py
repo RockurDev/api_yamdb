@@ -122,19 +122,18 @@ class CommentViewSet(viewsets.ModelViewSet):
     http_method_names = ('get', 'post', 'patch', 'delete')
     search_fields = ('text',)
 
-    def get_review(self, title_id: int, review_id: int) -> Review:
-        return get_object_or_404(Review, id=review_id, title_id=title_id)
-
     def get_queryset(self):
-        title_id = self.kwargs['title_id']
-        review_id = self.kwargs['review_id']
-        review = self.get_review(title_id, review_id)
-        return Comment.objects.filter(review=review).order_by('-pub_date')
+        return self.get_review().comments.order_by('-pub_date')
+
+    def get_review(self) -> Review:
+        return get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'),
+            title_id=self.kwargs.get('title_id'),
+        )
 
     def perform_create(self, serializer: CommentSerializer) -> None:
-        title_id = self.kwargs.get('title_id')
-        review_id = self.kwargs.get('review_id')
-        review = self.get_review(title_id=title_id, review_id=review_id)
+        review = self.get_review()
         serializer.save(
             title=review.title, review=review, author=self.request.user
         )
@@ -147,14 +146,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsModeratorOrReadOnly, IsAuthenticatedOrReadOnly]
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    def get_title(self, title_id: int) -> Title:
-        return get_object_or_404(Title, id=title_id)
-
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        title = self.get_title(title_id)
-        return Review.objects.filter(title_id=title.id).order_by('-pub_date')
+        return self.get_title().reviews.all()
+
+    def get_title(self) -> Title:
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
     def perform_create(self, serializer: ReviewSerializer) -> None:
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=self.get_title())
