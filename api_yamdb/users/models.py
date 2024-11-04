@@ -13,13 +13,11 @@ class User(AbstractUser):
         MODERATOR = 'moderator'
         ADMIN = 'admin'
 
-    is_staff = models.BooleanField(verbose_name='Is Staff', default=False)
-
     username = models.CharField(
         max_length=MAX_USERNAME_LENGTH,
         unique=True,
         verbose_name='Username',
-        validators=[validate_username],
+        validators=(validate_username,),
     )
     email = models.EmailField(
         max_length=MAX_EMAIL_LENGTH, unique=True, verbose_name='Email'
@@ -41,7 +39,7 @@ class User(AbstractUser):
     @property
     def is_admin(self) -> bool:
         return any(
-            [self.role == self.Role.ADMIN, self.is_superuser, self.is_staff]
+            (self.role == self.Role.ADMIN, self.is_superuser, self.is_staff)
         )
 
     @property
